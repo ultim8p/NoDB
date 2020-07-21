@@ -48,7 +48,7 @@ open class NoDB<T: DBModel> {
         }
     }
     
-    public func save(obj: T, completion: onSingleCompletion?) {
+    public func save(obj: T, completion: onSingleCompletion? = nil) {
         save(obj: [obj]) { (objs) in
             guard let first = objs.first else { completion?(nil)
                 return
@@ -57,7 +57,7 @@ open class NoDB<T: DBModel> {
         }
     }
     
-    public func save(obj: [T], completion: onMultCompletion?) {
+    public func save(obj: [T], completion: onMultCompletion? = nil) {
         queue.async { [weak self] in
             guard let self = self else { return }
             var objsAdded: [T?] = []
@@ -90,7 +90,7 @@ open class NoDB<T: DBModel> {
         }
     }
     
-    public func searchObj(withKey key: String, value: Any, completion: onSingleCompletion? = nil) {
+    public func searchObj(withKey key: String, value: Any, completion: onSingleCompletion?) {
         queue.async { [weak self] in
             guard let self = self else {
                 completion?(nil)
@@ -101,7 +101,7 @@ open class NoDB<T: DBModel> {
         }
     }
     
-    public func searchObjs(withKey key: String, lowerValue: Any, lowerOpt: LowerOperator, upperValue: Any, upperOpt: UpperOperator, limit: Int?, bound: Bound, completion: completion? = nil) {
+    public func searchObjs(withKey key: String, lowerValue: Any, lowerOpt: LowerOperator, upperValue: Any, upperOpt: UpperOperator, limit: Int?, bound: Bound, completion: completion?) {
         queue.async { [weak self] in
             guard let self = self else {
                 completion?(nil)
@@ -111,7 +111,7 @@ open class NoDB<T: DBModel> {
         }
     }
     
-    public func searchObjs(withKey key: String, value: Any, withOp operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, completion: completion? = nil) {
+    public func searchObjs(withKey key: String, value: Any, withOp operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, completion: completion?) {
         queue.async { [weak self] in
             guard let self = self else {
                 completion?(nil)
