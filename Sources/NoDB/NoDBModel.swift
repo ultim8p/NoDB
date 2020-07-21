@@ -9,7 +9,7 @@
 import Foundation
 import BinarySearch
 
-public class NoDB<T: DBModel> {
+open class NoDB<T: DBModel> {
     
     private var objects: [T] = []
     private let queue = DispatchQueue(customType: .noDBQueue)
