@@ -18,11 +18,11 @@ open class NoDB<T: DBModel> {
     public typealias onSingleSaved = (T?) -> ()
     public typealias onMultSaved = ([T?]) -> ()
     
-    public init(with type: T.Type) {
+    public init() {
         queue.async { [weak self] in
             guard let self = self else { return }
             self.objects = [T].loadDB() ?? []
-            guard let newKeysIndexs = IndexesManager.shared.loadDB(for: type) else { return }
+            guard let newKeysIndexs = IndexesManager.shared.loadDB(for: T.self) else { return }
             self.loadNewIndexes(with: newKeysIndexs)
         }
 
