@@ -1,0 +1,34 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "BinarySearch",
+        "repositoryURL": "https://github.com/ultim8p/BinarySearch",
+        "state": {
+          "branch": null,
+          "revision": "894ed466f8016badf9c89226f72f2faf19a0205b",
+          "version": "0.0.1"
+        }
+      },
+      {
+        "package": "CodableUtils",
+        "repositoryURL": "https://github.com/ultim8p/CodableUtils",
+        "state": {
+          "branch": null,
+          "revision": "81eac7fda428fa78ccfb7e2c97142335c4da8935",
+          "version": "0.0.1"
+        }
+      },
+      {
+        "package": "Mergeable",
+        "repositoryURL": "https://github.com/ultim8p/Mergeable",
+        "state": {
+          "branch": null,
+          "revision": "2b86ec19e713b751b9eb681704a4d525b75b7229",
+          "version": "0.0.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
