@@ -16,8 +16,9 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
+        
         .package(url: "https://github.com/ultim8p/Mergeable", from: "0.0.1"),
-        .package(url: "https://github.com/ultim8p/BinarySearch", from: "0.0.1"),
+        .package(url: "https://github.com/ultim8p/BinarySearch", .branch("master")),
         .package(url: "https://github.com/ultim8p/CodableUtils", from: "0.0.1")
     ],
     targets: [

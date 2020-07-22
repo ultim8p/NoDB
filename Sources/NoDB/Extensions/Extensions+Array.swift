@@ -13,7 +13,7 @@ extension Array where Element == [String: Any] {
     /// Returns the "index" value for the dictionary found with this key value.
     func indexValue(for key: String, value: Any) -> Int? {
         guard let indexedDict = indexedDict(with: key, value: value),
-            let index = indexedDict["index"] as? Int else { return nil }
+            let index = indexedDict[NoDBConstant.index.rawValue] as? Int else { return nil }
         return index
     }
     

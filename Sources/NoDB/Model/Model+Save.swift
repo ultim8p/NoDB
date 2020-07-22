@@ -29,7 +29,7 @@ extension Array where Element: DBModel {
                 copyObj.saveIndexesList()
             }
             let index = self.getIndexForInsertion()
-            copyObj.index = index
+            copyObj.noDBIndex = index
             self.insert(copyObj, at: index)
             copyObj.insertIndexes()
             obj = copyObj
@@ -48,9 +48,9 @@ extension DBModel {
         return indexDBName
     }
     
-    static var indexsRegisterdbName: String {
-        let indexsRegisterdbName = "indexes" + ":" + dbName
-        return indexsRegisterdbName
+    static var savedIndexsDBName: String {
+        let savedIndexsDBName = "indexes" + ":" + dbName
+        return savedIndexsDBName
     }
     
     var dbName: String {
@@ -62,32 +62,32 @@ extension DBModel {
     }
     //Just call this method when ypu know FOR SURE that new indexes should be created
     func insertIndexes() {
-        let indexes = type(of: self).indexes
+        let indexes = type(of: self).noDBIndexes
         indexes?.insertIndexes(for: self)
     }
     
     func upsertIndexes() {
-        let indexes = type(of: self).indexes
+        let indexes = type(of: self).noDBIndexes
         indexes?.upsertIndexes(for: self)
     }
     
     func updateIndexes(with newObj: Self) {
-        let indexes = type(of: self).indexes
+        let indexes = type(of: self).noDBIndexes
         indexes?.updateIndexes(for: self, newObj: newObj)
     }
     
     func deleteIndexes() {
-        let indexes = type(of: self).indexes
+        let indexes = type(of: self).noDBIndexes
         indexes?.deleteIndexes(for: self)
     }
 
     func updateIndexes(forIndexsAt indexs: [Int]){
-        let indexes = type(of: self).indexes
+        let indexes = type(of: self).noDBIndexes
         indexes?.updateIndex(for: self, forIndexsAt: indexs)
     }
     
     func saveIndexesList(){
-        let indexes = type(of: self).indexes
+        let indexes = type(of: self).noDBIndexes
         indexes?.saveIndexList(for: self)
     }
 }
@@ -122,7 +122,7 @@ extension Array where Element: DBModel {
     
     func getIndexForInsertion() -> Int {
         let keyName = Element.deletedIndexdbName
-        guard let deletions = IndexesManager.shared.deletions[keyName], let first = deletions.first, let index = first["index"] as? Int else { return self.count }
+        guard let deletions = IndexesManager.shared.deletions[keyName], let first = deletions.first, let index = first[NoDBConstant.index.rawValue] as? Int else { return self.count }
         IndexesManager.shared.delete(in: .deletions, indexDBName: keyName, indexDict: first, key: "_id")
         return index
     }

@@ -9,10 +9,10 @@
 import Foundation
 import Mergeable
 
-public protocol DBModel: Comparable, Mergeable {
+public protocol DBModel: Mergeable {
     var _id: String? { get set }
-    var index: Int? { get set }
-    static var indexes: [String]? { get }
+    var noDBIndex: Int? { get set }
+    static var noDBIndexes: [String]? { get }
 }
 
 extension Array where Element: DBModel {
@@ -22,3 +22,4 @@ extension Array where Element: DBModel {
     }
     
 }
+

@@ -11,7 +11,7 @@ import Foundation
 class IndexesManager {
     static var shared = IndexesManager()
 
-    private var indexesRegister: [String: [String]] = [:]
+    private var indexesRegister: [String: [[String: Any]]] = [:]
     var indexes: [String: [[String: Any]]] = [:]
     var deletions: [String: [[String: Any]]] = [:]
     
@@ -50,14 +50,15 @@ class IndexesManager {
     func loadDB<T: DBModel>(for model: T.Type) -> [Int]? {
         let dbName = model.dbName
         let typeIndex = type(of: [[String: Any]]())
-        indexesRegister[model.indexsRegisterdbName] = [String].loadDB(model.indexsRegisterdbName)
+        let savedIndexsDBName = model.savedIndexsDBName
+        indexesRegister[savedIndexsDBName] = typeIndex.loadDB(savedIndexsDBName)
         var newKeysIndexs: [Int] = []
-        for (index, key) in (model.indexes ?? []).enumerated() {
-            let indexKey = dbName + ":" + key
-            if let _ = indexesRegister[model.indexsRegisterdbName]?.binarySearch(key).currentIndex {
+        for (index, indexName) in (model.noDBIndexes ?? []).enumerated() {
+            let indexKey = dbName + ":" + indexName
+            if let _ = indexesRegister[savedIndexsDBName]?.binarySearch(key: NoDBConstant.indexSaved.rawValue, value: indexName).currentIndex {
                 indexes[indexKey] = typeIndex.loadDB(indexKey)
             } else {
-                insertToRegister(indxsRdbname: model.indexsRegisterdbName, key: key)
+                insertToSavedIndexs(withName: savedIndexsDBName, indexName: indexName)
                 newKeysIndexs.append(index)
             }
         }
@@ -67,24 +68,16 @@ class IndexesManager {
     }
     
     func saveDB<T: DBModel>(for model: T.Type) {
-        let dbName = model.dbName
-        for (index, key) in (indexesRegister[model.indexsRegisterdbName] ?? []).enumerated() {
-            let keyName = dbName + ":" + key
-            if !(model.indexes?.contains(key) ?? false) {
-                indexesRegister[dbName]?.remove(at: index)
-                indexes[keyName] = nil
-            } else {
-                indexes[keyName]?.saveDB(keyName)
-            }
-        }
-        indexesRegister[model.indexsRegisterdbName]?.saveDB(model.indexsRegisterdbName)
+        updateAndSavedIndexes(for: model)
+        indexesRegister[model.savedIndexsDBName]?.saveDB(model.savedIndexsDBName)
         deletions[model.deletedIndexdbName]?.saveDB(model.deletedIndexdbName)
     }
     
     func deleteDB<T: DBModel>(for model: T.Type) {
         let dbName = model.dbName
-        _ = indexesRegister[model.indexsRegisterdbName]?.deleteDB(model.indexsRegisterdbName)
-        for key in model.indexes ?? [] {
+        let savedIndexsDBName = model.savedIndexsDBName
+        _ = indexesRegister[savedIndexsDBName]?.deleteDB(savedIndexsDBName)
+        for key in model.noDBIndexes ?? [] {
             let keyName = dbName + ":" + key
             indexes[keyName]?.deleteDB(keyName)
         }
@@ -103,11 +96,30 @@ class IndexesManager {
         }
     }
     
-    func insertToRegister(indxsRdbname: String, key: String) {
-        if indexesRegister[indxsRdbname] == nil {
-            indexesRegister[indxsRdbname] = []
+    func insertToSavedIndexs(withName name: String, indexName: String) {
+        if indexesRegister[name] == nil {
+            indexesRegister[name] = []
         }
-        indexesRegister[indxsRdbname]?.upsert(key)
+        let key = NoDBConstant.indexSaved.rawValue
+        let newDict: [String: Any] = [key: indexName]
+        indexesRegister[name]?.upsert(newDict, key: key)
+    }
+
+    private func updateAndSavedIndexes<T: DBModel>(for model: T.Type){
+        let savedIndexsDBName = model.savedIndexsDBName
+        let dbName = model.dbName
+        for (index, indexObj) in (indexesRegister[savedIndexsDBName] ?? []).enumerated() {
+            guard let indexValue = indexObj[NoDBConstant.indexSaved.rawValue] as? String else {
+                continue
+            }
+            let keyName = dbName + ":" + indexValue
+            if (model.noDBIndexes?.contains(indexValue) ?? false) {
+                indexes[keyName]?.saveDB(keyName)
+            } else {
+                indexesRegister[savedIndexsDBName]?.remove(at: index)
+                indexes[keyName] = nil
+            }
+        }
     }
     
     enum table {

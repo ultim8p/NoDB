@@ -9,7 +9,7 @@ import Foundation
 
 extension Dictionary where Key == String, Value == Any {
     func indexValue() -> Int? {
-        guard let indexValue = self["index"], let index = indexValue as? Int else { return nil }
+        guard let indexValue = self[NoDBConstant.index.rawValue], let index = indexValue as? Int else { return nil }
         return index
     }
 }
