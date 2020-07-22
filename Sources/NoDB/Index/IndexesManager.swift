@@ -16,8 +16,8 @@ class IndexesManager {
     var deletions: [String: [[String: Any]]] = [:]
     
     
-    func insert(in dict: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
-        switch dict {
+    func insert(in type: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
+        switch type {
         case .indexes:
             if self.indexes[indexDBName] == nil {
                 self.indexes[indexDBName] = []
@@ -38,8 +38,8 @@ class IndexesManager {
         self.indexes[indexDBName]?.upsert(indexDict, key: key)
     }
     
-    func delete(in dict: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
-        switch dict {
+    func delete(in type: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
+        switch type {
         case .indexes:
             self.indexes[indexDBName]?.delete(indexDict, key: key)
         case .deletions:
@@ -49,7 +49,7 @@ class IndexesManager {
 
     func loadDB(withName dbName: String, noDBIndexes: [String]?) -> [Int]? {
         let typeIndex = type(of: [[String: Any]]())
-        let savedIndexsDBName = IndexesTypeName.savedIndexs.getFullName(with: dbName)
+        let savedIndexsDBName = IndexesTypeName.savedIndexes.getFullName(with: dbName)
 //        indexesNamesSaved[savedIndexsDBName] = typeIndex.loadDB(savedIndexsDBName)
         var newKeysIndexs: [Int] = []
         for (index, indexName) in (noDBIndexes ?? []).enumerated() {
@@ -68,14 +68,14 @@ class IndexesManager {
     
     func saveDB(with dbName: String, noDBIndexes: [String]?) {
         updateAndSavedIndexes(with: dbName, noDBIndexes: noDBIndexes)
-        let savedIndexsDBName = IndexesTypeName.savedIndexs.getFullName(with: dbName)
+        let savedIndexsDBName = IndexesTypeName.savedIndexes.getFullName(with: dbName)
         let deletedIndexsDBName = IndexesTypeName.deleted.getFullName(with: dbName)
         indexesNamesSaved[savedIndexsDBName]?.saveDB(savedIndexsDBName)
         deletions[deletedIndexsDBName]?.saveDB(deletedIndexsDBName)
     }
     
     func deleteDB(with dbName: String, noDBIndexes: [String]?) {
-        let savedIndexsDBName = IndexesTypeName.savedIndexs.getFullName(with: dbName)
+        let savedIndexsDBName = IndexesTypeName.savedIndexes.getFullName(with: dbName)
         _ = indexesNamesSaved[savedIndexsDBName]?.deleteDB(savedIndexsDBName)
         for key in noDBIndexes ?? [] {
             let keyName = dbName + ":" + key
@@ -107,7 +107,7 @@ class IndexesManager {
     }
 
     private func updateAndSavedIndexes(with dbName: String, noDBIndexes: [String]?){
-        let savedIndexsDBName = IndexesTypeName.savedIndexs.getFullName(with: dbName)
+        let savedIndexsDBName = IndexesTypeName.savedIndexes.getFullName(with: dbName)
         for (index, indexObj) in (indexesNamesSaved[savedIndexsDBName] ?? []).enumerated() {
             guard let indexValue = indexObj[NoDBConstant.indexSaved.rawValue] as? String else {
                 continue

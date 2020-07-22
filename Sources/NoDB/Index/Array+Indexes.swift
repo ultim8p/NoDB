@@ -8,6 +8,8 @@
 import Foundation
 import Mergeable
 
+/// A set of methods to manage database indexes.
+/// Every indexable key in an object will have
 extension Array where Element == String {
     
     func deleteIndexes<T: DBModel>(for obj: T, withDBName dbName: String) {
@@ -87,7 +89,7 @@ extension Array where Element == String {
     
     func saveIndexList<T: DBModel>(for obj: T, withDBName dbName: String) {
         for indexName in self {
-            IndexesManager.shared.insertToSavedIndexs(with: IndexesTypeName.savedIndexs.getFullName(with: dbName), indexName: indexName)
+            IndexesManager.shared.insertToSavedIndexs(with: IndexesTypeName.savedIndexes.getFullName(with: dbName), indexName: indexName)
         }
     }
 }
