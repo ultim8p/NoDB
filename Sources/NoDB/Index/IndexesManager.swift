@@ -98,12 +98,12 @@ class IndexesManager {
     }
     
     func insertToSavedIndexs(with dbName: String, indexName: String) {
-//        if indexesNamesSaved[dbName] == nil {
-//            indexesNamesSaved[dbName] = []
-//        }
-//        let key = NoDBConstant.indexSaved.rawValue
-//        let newDict: [String: Any] = [key: indexName]
-//        indexesNamesSaved[dbName]?.upsert(newDict, key: key)
+        if indexesNamesSaved[dbName] == nil {
+            indexesNamesSaved[dbName] = []
+        }
+        let key = NoDBConstant.indexSaved.rawValue
+        let newDict: [String: Any] = [key: indexName]
+        indexesNamesSaved[dbName]?.upsert(newDict, key: key)
     }
 
     private func updateAndSavedIndexes(with dbName: String, noDBIndexes: [String]?){
