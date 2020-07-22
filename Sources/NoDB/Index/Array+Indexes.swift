@@ -8,6 +8,8 @@
 import Foundation
 import Mergeable
 
+/// A set of methods to manage database indexes.
+/// Every indexable key in an object will have
 extension Array where Element == String {
     
     func deleteIndexes<T: DBModel>(for obj: T, withDBName dbName: String) {

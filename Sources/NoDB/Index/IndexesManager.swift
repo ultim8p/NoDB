@@ -16,8 +16,9 @@ class IndexesManager {
     var indexes: [String: [[String: Any]]] = [:]
     var deletions: [String: [[String: Any]]] = [:]
     
-    func insert(in dict: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
-        switch dict {
+    
+    func insert(in type: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
+        switch type {
         case .indexes:
             if indexes[indexDBName] == nil {
                 indexes[indexDBName] = []
@@ -38,8 +39,8 @@ class IndexesManager {
         self.indexes[indexDBName]?.upsert(indexDict, key: key)
     }
     
-    func delete(in dict: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
-        switch dict {
+    func delete(in type: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
+        switch type {
         case .indexes:
             indexes[indexDBName]?.delete(indexDict, key: key)
         case .deletions:
