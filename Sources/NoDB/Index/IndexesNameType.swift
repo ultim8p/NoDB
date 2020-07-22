@@ -9,13 +9,13 @@ import Foundation
 
 enum IndexesNameType {
     case deleted
-    case savedIndexs
+    case savedIndexes
     
     func getFullName(with dbName: String) -> String {
         switch self {
         case .deleted:
             return dbName + ":" + "deleted"
-        case .savedIndexs:
+        case .savedIndexes:
             return "indexes" + ":" + dbName
         }
     }

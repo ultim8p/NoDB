@@ -49,7 +49,7 @@ class IndexesManager {
 
     func loadDB(withName dbName: String, noDBIndexes: [String]?) -> [Int]? {
         let typeIndex = type(of: [[String: Any]]())
-        let savedIndexsDBName = IndexesNameType.savedIndexs.getFullName(with: dbName)
+        let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
         indexesNamesSaved[savedIndexsDBName] = typeIndex.loadDB(savedIndexsDBName)
         var newKeysIndexs: [Int] = []
         for (index, indexName) in (noDBIndexes ?? []).enumerated() {
@@ -68,14 +68,14 @@ class IndexesManager {
     
     func saveDB(with dbName: String, noDBIndexes: [String]?) {
         updateAndSavedIndexes(with: dbName, noDBIndexes: noDBIndexes)
-        let savedIndexsDBName = IndexesNameType.savedIndexs.getFullName(with: dbName)
+        let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
         let deletedIndexsDBName = IndexesNameType.deleted.getFullName(with: dbName)
         indexesNamesSaved[savedIndexsDBName]?.saveDB(savedIndexsDBName)
         deletions[deletedIndexsDBName]?.saveDB(deletedIndexsDBName)
     }
     
     func deleteDB(with dbName: String, noDBIndexes: [String]?) {
-        let savedIndexsDBName = IndexesNameType.savedIndexs.getFullName(with: dbName)
+        let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
             _ = indexesNamesSaved[savedIndexsDBName]?.deleteDB(savedIndexsDBName)
         for key in noDBIndexes ?? [] {
             let keyName = dbName + ":" + key
@@ -98,7 +98,7 @@ class IndexesManager {
     }
     
     func insertToSavedIndexs(with dbName: String, indexName: String) {
-        let savedIndexsDBName = IndexesNameType.savedIndexs.getFullName(with: dbName)
+        let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
             if indexesNamesSaved[savedIndexsDBName] == nil {
                 indexesNamesSaved[savedIndexsDBName] = []
         }
@@ -108,7 +108,7 @@ class IndexesManager {
     }
 
     private func updateAndSavedIndexes(with dbName: String, noDBIndexes: [String]?){
-        let savedIndexsDBName = IndexesNameType.savedIndexs.getFullName(with: dbName)
+        let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
         for (index, indexObj) in (indexesNamesSaved[savedIndexsDBName] ?? []).enumerated() {
             guard let indexValue = indexObj[NoDBConstant.indexSaved.rawValue] as? String else {
                 continue
