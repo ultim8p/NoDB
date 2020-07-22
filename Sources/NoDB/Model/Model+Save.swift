@@ -104,33 +104,33 @@ extension Array where Element: DBModel {
     }
     
     func getIndexForInsertion(withDBName dbName: String) -> Int {
-        let keyName = IndexesTypeName.deleted.getFullName(with: dbName)
+        let keyName = IndexesNameType.deleted.getFullName(with: dbName)
         guard let deletions = IndexesManager.shared.deletions[keyName], let first = deletions.first, let index = first[NoDBConstant.index.rawValue] as? Int else { return self.count }
         IndexesManager.shared.delete(in: .deletions, indexDBName: keyName, indexDict: first, key: "_id")
         return index
     }
     
     func countValid(withDBName dbName: String) -> Int {
-        guard let deletions = IndexesManager.shared.deletions[IndexesTypeName.deleted.getFullName(with: dbName)] else { return self.count }
+        guard let deletions = IndexesManager.shared.deletions[IndexesNameType.deleted.getFullName(with: dbName)] else { return self.count }
         return self.count - deletions.count
     }
     
-    func searchRange(with key: String, lowerValue: Any, lowerOpt: LowerOperator, upperValue: Any, upperOpt: UpperOperator, limit: Int?, bound: Bound) -> [Element]? {
-        let indexDBName = Element.dbName + ":" + key
+    func searchRange(with key: String, lowerValue: Any, lowerOpt: LowerOperator, upperValue: Any, upperOpt: UpperOperator, limit: Int?, bound: Bound, withDBName dbName: String) -> [Element]? {
+        let indexDBName = dbName + ":" + key
         guard let indexes = IndexesManager.shared.indexes[indexDBName] else { return nil }
         guard let indexsResults = indexes.searchRange(with: key, lowerValue: lowerValue, lowerOpt: lowerOpt, upperValue: upperValue, upperOpt: upperOpt, limit: limit, bound: bound) else { return nil}
         return getObjects(for: indexsResults)
     }
     
-    func searchRange(with key: String, value: Any, withOp operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil) -> [Element]? {
-        let indexDBName = Element.dbName + ":" + key
+    func searchRange(with key: String, value: Any, withOp operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, withDBName dbName: String) -> [Element]? {
+        let indexDBName = dbName + ":" + key
         guard let indexes = IndexesManager.shared.indexes[indexDBName] else { return nil }
         guard let indexsResults = indexes.searchRange(with: key, value: value, withOp: operatr, limit: limit, skip: skip) else { return nil }
         return getObjects(for: indexsResults)
     }
     
-    func getAllValid() -> [Element]? {
-        let indexDBName = Element.dbName + ":" + "_id"
+    func getAllValid(withDBName dbName: String) -> [Element]? {
+        let indexDBName = dbName + ":" + "_id"
         guard let indexesRsults = IndexesManager.shared.indexes[indexDBName] else { return nil }
         return getObjects(for: indexesRsults)
     }
