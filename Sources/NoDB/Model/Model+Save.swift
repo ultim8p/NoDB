@@ -43,23 +43,6 @@ extension DBModel {
         return String(describing: self).lowercased()
     }
     
-//    static var deletedIndexdbName: String {
-//        let indexDBName = dbName + ":" + "deleted"
-//        return indexDBName
-//    }
-//    
-//    static var savedIndexsDBName: String {
-//        let savedIndexsDBName = "indexes" + ":" + dbName
-//        return savedIndexsDBName
-//    }
-    
-//    var dbName: String {
-//        return Self.dbName
-//    }
-//    
-//    var deletedIndexdbName: String {
-//        return Self.deletedIndexdbName
-//    }
     //Just call this method when ypu know FOR SURE that new indexes should be created
     func insertIndexes(withDBName dbName: String) {
         let indexes = type(of: self).noDBIndexes
