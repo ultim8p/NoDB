@@ -10,12 +10,12 @@ import Foundation
 
 extension Array where Element: DBModel {
     
-    mutating func delete(_ obj: Element) {
+    mutating func delete(_ obj: Element, withDBName dbName: String) {
         guard let id = obj._id else {
             return
         }
-        let binaryObj = objectAndIndex(withId: id)
+        let binaryObj = objectAndIndex(withId: id, withDBName: dbName)
         guard let oldObj = binaryObj.obj, let _ = binaryObj.index else { return }
-        oldObj.deleteIndexes()
+        oldObj.deleteIndexes(withDBName: dbName)
     }
 }

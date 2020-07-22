@@ -10,8 +10,7 @@ import Mergeable
 
 extension Array where Element == String {
     
-    func deleteIndexes<T: DBModel>(for obj: T) {
-        let dbName = obj.dbName
+    func deleteIndexes<T: DBModel>(for obj: T, withDBName dbName: String) {
         let objDict = obj.toDictionary()
         guard let objIndex = objDict[NoDBConstant.index.rawValue] else { return }
         for indexKey in self {
@@ -26,11 +25,10 @@ extension Array where Element == String {
         guard let indexVal = objDict[indexKey] else { return }
         let deletedDictObj: [String: Any] = [indexKey: indexVal,
                                              NoDBConstant.index.rawValue: objIndex]
-        IndexesManager.shared.insert(in: .deletions, indexDBName: obj.deletedIndexdbName, indexDict: deletedDictObj, key: indexKey)
+        IndexesManager.shared.insert(in: .deletions, indexDBName: IndexesTypeName.deleted.getFullName(with: dbName), indexDict: deletedDictObj, key: indexKey)
     }
     
-    func insertIndexes<T: DBModel>(for obj: T) {
-        let dbName = obj.dbName
+    func insertIndexes<T: DBModel>(for obj: T, withDBName dbName: String) {
         let objDict = obj.toDictionary()
         guard let objIndex = objDict[NoDBConstant.index.rawValue] else { return }
         for indexKey in self {
@@ -43,8 +41,7 @@ extension Array where Element == String {
         }
     }
     
-    func upsertIndexes<T: DBModel>(for obj: T) {
-        let dbName = obj.dbName
+    func upsertIndexes<T: DBModel>(for obj: T, withDBName dbName: String) {
         let objDict = obj.toDictionary()
         guard let objIndex = objDict[NoDBConstant.index.rawValue] else { return }
         for indexKey in self {
@@ -57,8 +54,7 @@ extension Array where Element == String {
         }
     }
     
-    func updateIndexes<T: DBModel>(for obj: T, newObj: T) {
-        let dbName = obj.dbName
+    func updateIndexes<T: DBModel>(for obj: T, newObj: T, withDBName dbName: String) {
         let objDict = obj.toDictionary()
         let newObjDict = newObj.toDictionary()
         guard let objIndex = objDict[NoDBConstant.index.rawValue] else { return }
@@ -77,8 +73,7 @@ extension Array where Element == String {
         }
      }
     
-    func updateIndex<T: DBModel>(for obj: T, forIndexsAt indexs: [Int]) {
-        let dbName = obj.dbName
+    func updateIndex<T: DBModel>(for obj: T, forIndexsAt indexs: [Int], withDBName dbName: String) {
         for index in indexs {
             let indexKey = self[index]
             let objDict = obj.toDictionary()
@@ -90,9 +85,9 @@ extension Array where Element == String {
         }
     }
     
-    func saveIndexList<T: DBModel>(for obj: T) {
+    func saveIndexList<T: DBModel>(for obj: T, withDBName dbName: String) {
         for indexName in self {
-            IndexesManager.shared.insertToSavedIndexs(withName: T.savedIndexsDBName, indexName: indexName)
+            IndexesManager.shared.insertToSavedIndexs(with: IndexesTypeName.savedIndexs.getFullName(with: dbName), indexName: indexName)
         }
     }
 }
