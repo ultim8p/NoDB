@@ -64,7 +64,7 @@ The protocol has two basic variables:
 2. **noDBIndexes: [String]** A list of strings defining properties that should be indexed. 
 * Example:
 In this example we have a **User** model with two "custom" properties **dateCreated** and **name**. We want to be able to search and delete users using these two properties so we will add the property names to the **noDBIndexes**.
-Note that we are not adding id as an indexed value since the database will automatically index id properties for all models. (More on ids below).
+> Note that we are not adding id as an indexed value since the database will automatically index id properties for all models. (More on ids below).
 * Create Model Example:
 ```swift
 struct User: DBModel {
@@ -78,7 +78,7 @@ struct User: DBModel {
 ```
 
 ## Indexes:
-> NoDB uses indexed tables in order to perform efficient and fast operations. Every database operation you wish to perform will have to be previously added to the **noDBIndexes** of your model.
+NoDB uses indexed tables in order to perform efficient and fast operations. Every database operation you wish to perform will have to be previously added to the **noDBIndexes** of your model.
 > Note that for every extra property you wish to index there will be a performance cost since the database will have to manage that extra index for every database operation. So consider indexing only the properties that you will actually use for operations like query and delete.
 * Query Example:
 ```swift
@@ -89,7 +89,7 @@ friendsDB
 ## IDs:
 All objects that need to be saved in the database are required to have an **id** property. Objects with no **id** will be ignored.
 By default the database will automatically index ids for your models for this reason you don't need to add your id property to the **noDBIndexes** array.
-Note that the DBModel protocol doesn't require you to have an id property. This is because you can have the name of your id properties be anything you like and each database can have their own id property. 
+> Note that the DBModel protocol doesn't require you to have an id property. This is because you can have the name of your id properties be anything you like and each database can have their own id property. 
 By default the database will try to pull the **id** value from a property named **"id"** but this can be changed by passing the name of your **id** property when initializing the database.
 For now all id properties must be of type String. Support for Integers will be considered in a future update.
 * Custom ID Example:
@@ -196,10 +196,10 @@ Support for encrypting the Database files will be added in a future update.
 let usersDB = NoDB<User>()
 let friendsDB = NoDB<User>(name: "friend")
 ```
-> Imagine you have a screen where the user enters to see all their friends.
-> In this case you would call the server to get the list of friends and then store them locally on the device using NoDB.
-> A good place to call "save()" here would be after the user exits this screen since you won't be updating the friendsDB any more unless the user comes back to friends screen.
-> Example:
+Imagine you have a screen where the user enters to see all their friends.
+In this case you would call the server to get the list of friends and then store them locally on the device using NoDB.
+A good place to call "save()" here would be after the user exits this screen since you won't be updating the friendsDB any more unless the user comes back to friends screen.
+Example:
 ```swift
 let friendsDB = NoDB<User>(name: "friend")
 
