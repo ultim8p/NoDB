@@ -48,8 +48,8 @@ public enum SortOrder {
     case descending
 }
 public struct Sort {
-    var sortKey: String
-    var order: SortOrder
+    public var sortKey: String
+    public var order: SortOrder
 }
 
 public func ==(lhs: String, rhs: Any) -> Query {
