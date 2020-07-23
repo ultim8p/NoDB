@@ -33,7 +33,7 @@ public extension Array where Element == [String: Any] {
     func range(skip: Int?, limit: Int?) -> [[String: Any]]? {
         let startRange = startIndex(skip: skip)
         let endRange = endIndex(skip: skip, limit: limit)
-        guard startRange < endRange else { return nil }
+        guard startRange <= endRange else { return nil }
         return range(start: startRange, end: endRange)
     }
     func range(start: Int, end: Int) -> [[String: Any]]? {
@@ -65,7 +65,7 @@ public extension Array where Element: DBModel {
     func range(skip: Int?, limit: Int?) -> [Element]? {
         let startRange = startIndex(skip: skip)
         let endRange = endIndex(skip: skip, limit: limit)
-        guard startRange < endRange else { return nil }
+        guard startRange <= endRange else { return nil }
         return range(start: startRange, end: endRange)
     }
     func range(start: Int, end: Int) -> [Element]? {
@@ -105,13 +105,14 @@ public extension Array where Element: DBModel {
     ///
     func find(_ query: Query?, dbName: String, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, idKey: String) -> [Element]? {
         guard let queryIndexes = findIndexes(for: query, dbName: dbName, idKey: idKey) else { return nil }
-        print("FOUND INDEXES COUNT: \(queryIndexes.count)")
+        print("GOT QUERY INDEXES: \(queryIndexes.count)")
         return getElemetResults(for: queryIndexes, sort: sort, skip: skip, limit: limit)
     }
     
     private func getElemetResults(for queryIndexes: [[String: Any]], sort: Sort?, skip: Int? = nil, limit: Int? = nil) -> [Element]? {
         // If sort parameter exists, get the list of elements first to sort them before performing the skip and limit operations.
         if let sort = sort {
+            print("SORTING")
             var objs = models(fromIndexes: queryIndexes)
             objs?.sort(sort)
             return objs?.range(skip: skip, limit: limit)

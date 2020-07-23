@@ -18,8 +18,8 @@ extension Array where Element == String {
         let objDict = obj.toDictionary()
         let noDBIndexKey = NoDBConstant.index.rawValue
         let noDBIdKey = NoDBConstant.id.rawValue
-        guard let objIndex = objDict[idKey],
-            let objId = objDict[noDBIdKey] else { return }
+        guard let objIndex = objDict[noDBIndexKey],
+            let objId = objDict[idKey] else { return }
         for indexKey in self {
             // Ignore id if it is defined as an indexable key.
             if indexKey == idKey { continue }
@@ -37,5 +37,10 @@ extension Array where Element == String {
         IndexesManager.shared.insert(indexDBName: dbName + ":" + noDBIdKey,
                                      sortKey: noDBIdKey,
                                      indexDict: idIndexDict)
+        
+        
+        let indexesDBName = dbName + ":" + noDBIdKey
+        
+        let idIndexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexesDBName)
     }
 }

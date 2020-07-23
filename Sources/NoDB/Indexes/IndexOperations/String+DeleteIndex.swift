@@ -24,7 +24,7 @@ extension Array where Element == String {
             let indexDBName = dbName + ":" + indexKey
             if let indexVal = objDict[indexKey] {
                 let dictObj: [String: Any] = [indexKey: indexVal,
-                                              NoDBConstant.index.rawValue: objIndex]
+                                              noDBIndexKey: objIndex]
                 IndexesManager.shared.delete(indexDBName: indexDBName, sortKey: indexKey, indexDict: dictObj)
             }
         }
