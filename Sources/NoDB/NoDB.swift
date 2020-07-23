@@ -31,7 +31,7 @@ open class NoDB<T: DBModel> {
         }
     }
     
-    public func find(_ query: Query, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, completion: completion?) {
+    public func find(_ query: Query?, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, completion: completion?) {
         queue.async { [weak self] in
             guard let self = self else { return }
             let results = self.objects.find(query, dbName: self.name, sort: sort, skip: skip, limit: limit)
