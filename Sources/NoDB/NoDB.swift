@@ -15,19 +15,18 @@ open class NoDB<T: DBModel> {
     private let queue = DispatchQueue(customType: .noDBQueue)
     public var name: String
     public typealias completion = ([T]?) -> ()
-    public typealias count = (Int) -> ()
+    public typealias countHandler = (Int) -> ()
     public typealias onSingleCompletion = (T?) -> ()
     public typealias onMultCompletion = ([T?]) -> ()
     
     public init(name: String? = nil) {
         self.name = name ?? T.dbName
-//        queue.async(flags: .barrier) { [weak self] in
-//            guard let self = self else { return }
+        queue.async { [weak self] in
+            guard let self = self else { return }
             self.objects = [T].loadDB(self.name) ?? []
-            print("objs \(self.objects) in \(name)")
-            guard let newKeysIndexs = IndexesManager.shared.loadDB(withName: self.name, noDBIndexes: T.noDBIndexes) else { return}
+            guard let newKeysIndexs = IndexesManager.shared.loadDB(withName: self.name, noDBIndexes: T.noDBIndexes) else { return }
             self.loadNewIndexes(with: newKeysIndexs)
-//        }
+        }
 //        NotificationCenter.default.addObserver(self, selector: #selector(saveDB), name: UIScene.didDisconnectNotification, object: nil)
     }
     
@@ -38,19 +37,19 @@ open class NoDB<T: DBModel> {
     private func loadNewIndexes(with positions: [Int]) {
 //        queue.async { [weak self] in
 //            guard let self = self else { return }
-        guard let validObjs = self.objects.getAllValid(withDBName: self.name) else { return }
-        for obj in validObjs {
-            obj.updateIndexes(forIndexsAt: positions, withDBName: self.name)
-        }
+            guard let validObjs = self.objects.getAllValid(withDBName: self.name) else { return }
+            for obj in validObjs {
+                obj.updateIndexes(forIndexsAt: positions, withDBName: self.name)
+            }
 //        }
     }
     
     @objc public func saveDB(){
-//        queue.async { [weak self] in
-//            guard let self = self else { return }
+        queue.async { [weak self] in
+            guard let self = self else { return }
         self.objects.saveDB(self.name)
             IndexesManager.shared.saveDB(with: self.name, noDBIndexes: T.noDBIndexes)
-//        }
+        }
     }
     
     public func save(obj: T, completion: onSingleCompletion? = nil) {
@@ -63,8 +62,8 @@ open class NoDB<T: DBModel> {
     }
     
     public func save(obj: [T], completion: onMultCompletion? = nil) {
-//        queue.async { [weak self] in
-//            guard let self = self else { return }
+        queue.async { [weak self] in
+            guard let self = self else { return }
             var objsAdded: [T?] = []
             for obj in obj {
                 var obj: T? = obj
@@ -72,7 +71,7 @@ open class NoDB<T: DBModel> {
                 objsAdded.append(obj)
             }
             completion?(objsAdded)
-//        }
+        }
     }
     
     public func delete(obj: T) {
@@ -80,70 +79,70 @@ open class NoDB<T: DBModel> {
     }
     
     public func delete(obj: [T]) {
-//        queue.async { [weak self] in
-//            guard let self = self else { return }
+        queue.async { [weak self] in
+            guard let self = self else { return }
             for obj in obj {
                 self.objects.delete(obj, withDBName: self.name)
             }
-//        }
+        }
     }
     
-    public func count(completion: count?) {
-//        queue.async { [weak self] in
-//            guard let self = self else { return }
+    public func count(completion: countHandler?) {
+        queue.async { [weak self] in
+            guard let self = self else { return }
             completion?(self.objects.countValid(withDBName: self.name))
-//        }
+        }
     }
     
     public func searchObj(withKey key: String, value: Any, completion: onSingleCompletion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
+        queue.async { [weak self] in
+            guard let self = self else {
+                completion?(nil)
+                return
+            }
             let obj = self.objects.object(with: key, value: value, withDBName: self.name)
             completion?(obj)
-//        }
+        }
     }
     
     public func searchObjs(withKey key: String, lowerValue: Any, lowerOpt: LowerOperator, upperValue: Any, upperOpt: UpperOperator, limit: Int?, bound: Bound, completion: completion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
+        queue.async { [weak self] in
+            guard let self = self else {
+                completion?(nil)
+                return
+            }
             completion?(self.objects.searchRange(with: key, lowerValue: lowerValue, lowerOpt: lowerOpt, upperValue: upperValue, upperOpt: upperOpt, limit: limit, bound: bound, withDBName: self.name))
-//        }
+        }
     }
     
     public func searchObjs(withKey key: String, value: Any, withOp operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, completion: completion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
+        queue.async { [weak self] in
+            guard let self = self else {
+                completion?(nil)
+                return
+            }
             completion?(self.objects.searchRange(with: key, value: value, withOp: operatr, limit: limit, skip: skip, withDBName: self.name))
-//        }
+        }
     }
     
     public func getAll(completion: completion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
+        queue.async { [weak self] in
+            guard let self = self else {
+                completion?(nil)
+                return
+            }
             completion?(self.objects.getAllValid(withDBName: self.name))
-//        }
+        }
     }
     
     public func delete(){
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                return
-//            }
+        queue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
         self.objects.deleteDB(self.name)
             IndexesManager.shared.deleteDB(with: self.name, noDBIndexes: T.noDBIndexes)
-//        }
+        }
     }
     
 }

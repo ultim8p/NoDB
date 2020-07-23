@@ -14,7 +14,7 @@ extension DispatchQueue {
         case .noDBQueue:
             self.init(label: customType.rawValue, qos: customType.qos)
         case .indexesManager:
-            self.init(label: customType.rawValue, qos: customType.qos, attributes: .concurrent)
+            self.init(label: customType.rawValue, qos: customType.qos)
         }
     }
     
