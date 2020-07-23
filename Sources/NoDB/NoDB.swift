@@ -27,33 +27,15 @@ open class NoDB<T: DBModel> {
             guard let newKeysIndexs = IndexesManager.shared.loadDB(withName: self.name, noDBIndexes: T.noDBIndexes) else { return }
             self.loadNewIndexes(with: newKeysIndexs)
         }
-//        NotificationCenter.default.addObserver(self, selector: #selector(saveDB), name: UIScene.didDisconnectNotification, object: nil)
     }
     
-//    deinit {
-//        NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
-//    }
-    
-    
-    
-    
-    public func find(_ query: Query, skip: Int? = nil, limit: Int? = nil, completion: completion?) {
+    public func find(_ query: Query, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, completion: completion?) {
         queue.async { [weak self] in
             guard let self = self else { return }
-            let results = self.objects.find(query, dbName: self.name, limit: limit, skip: skip)
+            let results = self.objects.find(query, dbName: self.name, sort: sort, skip: skip, limit: limit)
             completion?(results)
         }
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     private func loadNewIndexes(with positions: [Int]) {
 //        queue.async { [weak self] in
