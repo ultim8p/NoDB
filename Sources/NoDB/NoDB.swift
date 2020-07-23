@@ -75,8 +75,29 @@ open class NoDB<T: DBModel> {
         }
     }
     
-
+    // MARK: DatabaseFile
     
+    public func saveDB(_ handler: VoidCompletion? = nil){
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            self.objects.saveDB(self.name)
+            IndexesManager.shared.saveDB(with: self.name, noDBIndexes: T.noDBIndexes)
+            DispatchQueue.main.async {
+                handler?()
+            }
+        }
+    }
+    
+    public func deleteDB(_ handler: VoidCompletion? = nil){
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            self.objects.deleteDB(self.name)
+            IndexesManager.shared.deleteDB(with: self.name, noDBIndexes: T.noDBIndexes)
+            DispatchQueue.main.async {
+                handler?()
+            }
+        }
+    }
     
     
     private func loadNewIndexes(with positions: [Int]) {
@@ -85,91 +106,4 @@ open class NoDB<T: DBModel> {
             obj.updateIndexes(forIndexsAt: positions, withDBName: self.name)
         }
     }
-    
-    
-    
-//    public func searchObj(withKey key: String, value: Any, completion: onSingleCompletion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
-//            let obj = self.objects.object(with: key, value: value, withDBName: self.name)
-//            completion?(obj)
-//        }
-//    }
-    
-//    public func searchObjs(withKey key: String, lowerValue: Any, lowerOpt: LowerOperator, upperValue: Any, upperOpt: UpperOperator, limit: Int?, bound: Bound, completion: completion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
-//            completion?(self.objects.searchRange(with: key, lowerValue: lowerValue, lowerOpt: lowerOpt, upperValue: upperValue, upperOpt: upperOpt, limit: limit, bound: bound, withDBName: self.name))
-//        }
-//    }
-    
-//    public func searchObjs(withKey key: String, value: Any, withOp operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, completion: completion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
-//            completion?(self.objects.searchRange(with: key, value: value, operatr: operatr, limit: limit, skip: skip, withDBName: self.name))
-//        }
-//    }
-    
-//    public func searchObjs(withKey key: String, value: Any, withOp operatr: LowerOperator, completion: completion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
-//            completion?(self.objects.searchRange(with: key, value: value, operatr: operatr, withDBName: self.name))
-//        }
-//    }
-    
-//    public func searchObjs(withKey key: String, value: Any, withOp operatr: UpperOperator, completion: completion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
-//            completion?(self.objects.searchRange(with: key, value: value, operatr: operatr, withDBName: self.name))
-//        }
-//    }
-    
-//    public func getAll(completion: completion?) {
-//        queue.async { [weak self] in
-//            guard let self = self else {
-//                completion?(nil)
-//                return
-//            }
-//            completion?(self.objects.getAllValid(withDBName: self.name))
-//        }
-//    }
-    
-    
-    // MARK: DatabaseFile
-    
-    public func saveDB(_ handler: VoidCompletion?){
-        queue.async { [weak self] in
-            guard let self = self else { return }
-        self.objects.saveDB(self.name)
-            DispatchQueue.main.async {
-                IndexesManager.shared.saveDB(with: self.name, noDBIndexes: T.noDBIndexes)
-            }
-        }
-    }
-    
-    public func deleteDB(){
-        queue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-        self.objects.deleteDB(self.name)
-            IndexesManager.shared.deleteDB(with: self.name, noDBIndexes: T.noDBIndexes)
-        }
-    }
-    
 }
