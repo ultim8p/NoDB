@@ -48,8 +48,13 @@ public enum SortOrder {
     case descending
 }
 public struct Sort {
-    public var sortKey: String
+    public var key: String
     public var order: SortOrder
+    
+    public init(key: String, order: SortOrder) {
+        self.key = key
+        self.order = order
+    }
 }
 
 public func ==(lhs: String, rhs: Any) -> Query {
@@ -157,8 +162,8 @@ public extension Array where Element: DBModel {
         self.sort { (obj1, obj2) -> Bool in
             let dict1 = obj1.toDictionary()
             let dict2 = obj2.toDictionary()
-            if let val2 = dict2[sort.sortKey] {
-                let compare = dict1.compare(to: val2, key: sort.sortKey)
+            if let val2 = dict2[sort.key] {
+                let compare = dict1.compare(to: val2, key: sort.key)
                 switch sort.order {
                 case .ascending:
                     return compare == .lower
