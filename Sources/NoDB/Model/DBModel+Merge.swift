@@ -13,7 +13,7 @@ extension DBModel {
         guard let objDM = obj as? Self, let id = self._id, let extId = objDM._id, id == extId else {
             return nil
         }
-        let changes = self.merge(type, with: obj)
+        let changes = self.merge(with: obj, idKey: "_id")
         return changes
     }
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum IndexesTypeName {
+enum IndexesNameType {
     case deleted
     case savedIndexes
     

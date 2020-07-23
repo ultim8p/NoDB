@@ -27,7 +27,7 @@ extension Array where Element == String {
         guard let indexVal = objDict[indexKey] else { return }
         let deletedDictObj: [String: Any] = [indexKey: indexVal,
                                              NoDBConstant.index.rawValue: objIndex]
-        IndexesManager.shared.insert(in: .deletions, indexDBName: IndexesTypeName.deleted.getFullName(with: dbName), indexDict: deletedDictObj, key: indexKey)
+        IndexesManager.shared.insert(in: .deletions, indexDBName: IndexesNameType.deleted.getFullName(with: dbName), indexDict: deletedDictObj, key: indexKey)
     }
     
     func insertIndexes<T: DBModel>(for obj: T, withDBName dbName: String) {
@@ -89,7 +89,7 @@ extension Array where Element == String {
     
     func saveIndexList<T: DBModel>(for obj: T, withDBName dbName: String) {
         for indexName in self {
-            IndexesManager.shared.insertToSavedIndexs(with: IndexesTypeName.savedIndexes.getFullName(with: dbName), indexName: indexName)
+            IndexesManager.shared.insertToSavedIndexes(with: dbName, indexName: indexName)
         }
     }
 }

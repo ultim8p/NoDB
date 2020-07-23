@@ -15,7 +15,7 @@ open class NoDB<T: DBModel> {
     private let queue = DispatchQueue(customType: .noDBQueue)
     public var name: String
     public typealias completion = ([T]?) -> ()
-    public typealias count = (Int) -> ()
+    public typealias countHandler = (Int) -> ()
     public typealias onSingleCompletion = (T?) -> ()
     public typealias onMultCompletion = ([T?]) -> ()
     
@@ -24,10 +24,9 @@ open class NoDB<T: DBModel> {
         queue.async { [weak self] in
             guard let self = self else { return }
             self.objects = [T].loadDB(self.name) ?? []
-            guard let newKeysIndexs = IndexesManager.shared.loadDB(withName: self.name, noDBIndexes: T.noDBIndexes) else { return}
+            guard let newKeysIndexs = IndexesManager.shared.loadDB(withName: self.name, noDBIndexes: T.noDBIndexes) else { return }
             self.loadNewIndexes(with: newKeysIndexs)
         }
-
 //        NotificationCenter.default.addObserver(self, selector: #selector(saveDB), name: UIScene.didDisconnectNotification, object: nil)
     }
     
@@ -36,16 +35,19 @@ open class NoDB<T: DBModel> {
 //    }
     
     private func loadNewIndexes(with positions: [Int]) {
-        guard let validObjs = objects.getAllValid() else { return }
-        for obj in validObjs {
-            obj.updateIndexes(forIndexsAt: positions, withDBName: self.name)
-        }
+//        queue.async { [weak self] in
+//            guard let self = self else { return }
+            guard let validObjs = self.objects.getAllValid(withDBName: self.name) else { return }
+            for obj in validObjs {
+                obj.updateIndexes(forIndexsAt: positions, withDBName: self.name)
+            }
+//        }
     }
     
     @objc public func saveDB(){
         queue.async { [weak self] in
             guard let self = self else { return }
-            self.objects.saveDB()
+        self.objects.saveDB(self.name)
             IndexesManager.shared.saveDB(with: self.name, noDBIndexes: T.noDBIndexes)
         }
     }
@@ -85,7 +87,7 @@ open class NoDB<T: DBModel> {
         }
     }
     
-    public func count(completion: count?) {
+    public func count(completion: countHandler?) {
         queue.async { [weak self] in
             guard let self = self else { return }
             completion?(self.objects.countValid(withDBName: self.name))
@@ -109,7 +111,7 @@ open class NoDB<T: DBModel> {
                 completion?(nil)
                 return
             }
-             completion?(self.objects.searchRange(with: key, lowerValue: lowerValue, lowerOpt: lowerOpt, upperValue: upperValue, upperOpt: upperOpt, limit: limit, bound: bound))
+            completion?(self.objects.searchRange(with: key, lowerValue: lowerValue, lowerOpt: lowerOpt, upperValue: upperValue, upperOpt: upperOpt, limit: limit, bound: bound, withDBName: self.name))
         }
     }
     
@@ -119,7 +121,7 @@ open class NoDB<T: DBModel> {
                 completion?(nil)
                 return
             }
-            completion?(self.objects.searchRange(with: key, value: value, withOp: operatr, limit: limit, skip: skip))
+            completion?(self.objects.searchRange(with: key, value: value, withOp: operatr, limit: limit, skip: skip, withDBName: self.name))
         }
     }
     
@@ -129,7 +131,7 @@ open class NoDB<T: DBModel> {
                 completion?(nil)
                 return
             }
-            completion?(self.objects.getAllValid())
+            completion?(self.objects.getAllValid(withDBName: self.name))
         }
     }
     
@@ -138,7 +140,7 @@ open class NoDB<T: DBModel> {
             guard let self = self else {
                 return
             }
-            self.objects.deleteDB()
+        self.objects.deleteDB(self.name)
             IndexesManager.shared.deleteDB(with: self.name, noDBIndexes: T.noDBIndexes)
         }
     }

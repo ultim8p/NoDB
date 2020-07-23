@@ -10,15 +10,21 @@ import Foundation
 extension DispatchQueue {
     
     convenience init(customType: customType) {
-        self.init(label: customType.rawValue, qos: customType.qos)
+        switch customType {
+        case .noDBQueue:
+            self.init(label: customType.rawValue, qos: customType.qos)
+        case .indexesManager:
+            self.init(label: customType.rawValue, qos: customType.qos)
+        }
     }
     
     enum customType: String {
         case noDBQueue = "NoDBQueue"
+        case indexesManager = "IndexesManagerQueue"
         
         var qos: DispatchQoS {
             switch self {
-            case .noDBQueue:
+            case .noDBQueue, .indexesManager:
                 return DispatchQoS.userInitiated
             }
         }
