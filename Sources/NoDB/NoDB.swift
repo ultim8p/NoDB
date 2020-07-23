@@ -34,6 +34,27 @@ open class NoDB<T: DBModel> {
 //        NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
 //    }
     
+    
+    
+    
+    func find(_ query: Query, skip: Int? = nil, limit: Int? = nil, completion: completion?) {
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            let results = self.objects.find(query, dbName: self.name, limit: limit, skip: skip)
+            completion?(results)
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     private func loadNewIndexes(with positions: [Int]) {
 //        queue.async { [weak self] in
 //            guard let self = self else { return }
