@@ -103,8 +103,8 @@ public extension Array where Element: DBModel {
     ///     - query: Query to execute to find objects
     ///     - dbName: Name of the Database to perform the query on.
     ///
-    func find(_ query: Query?, dbName: String, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil) -> [Element]? {
-        guard let queryIndexes = findIndexes(for: query, dbName: dbName) else { return nil }
+    func find(_ query: Query?, dbName: String, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, idKey: String) -> [Element]? {
+        guard let queryIndexes = findIndexes(for: query, dbName: dbName, idKey: idKey) else { return nil }
         print("FOUND INDEXES COUNT: \(queryIndexes.count)")
         return getElemetResults(for: queryIndexes, sort: sort, skip: skip, limit: limit)
     }
@@ -126,14 +126,16 @@ public extension Array where Element: DBModel {
     ///     - query: Query containing search parameters to find the list of indexes.
     ///     - dbName: Name of the database to perform the query on.
     /// - Returns: List of index dictionaries that matched the query.
-    private func findIndexes(for query: Query?, dbName: String) -> [[String: Any]]? {
-        guard let key = query?.key,
+    private func findIndexes(for query: Query?, dbName: String, idKey: String) -> [[String: Any]]? {
+        guard var key = query?.key,
             let val = query?.value,
             let op = query?.op else {
                 // If query has no properties, find all
                 let indexDBName = dbName + ":" + NoDBConstant.id.rawValue
                 return IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName)
         }
+        // If query is performed over the id of the object, change it to use local noDBId key.
+        if key == idKey { key = NoDBConstant.id.rawValue }
         
         let indexDBName = dbName + ":" + key
         guard let indexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
