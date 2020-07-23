@@ -13,5 +13,6 @@ extension Array where Element == String {
         for indexName in self {
             IndexesManager.shared.insertToSavedIndexes(with: dbName, indexName: indexName)
         }
+        IndexesManager.shared.insertToSavedIndexes(with: dbName, indexName: NoDBConstant.id.rawValue)
     }
 }

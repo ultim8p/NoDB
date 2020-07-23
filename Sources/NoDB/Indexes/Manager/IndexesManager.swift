@@ -73,6 +73,8 @@ class IndexesManager {
 
     func loadDB(withName dbName: String, noDBIndexes: [String]?) -> [Int]? {
         queue.sync {
+            var noDBIndexes = noDBIndexes
+            noDBIndexes?.append(NoDBConstant.id.rawValue)
             let typeIndex = type(of: [[String: Any]]())
             let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
             indexesNamesSaved[savedIndexsDBName] = typeIndex.loadDB(savedIndexsDBName)
@@ -147,6 +149,8 @@ class IndexesManager {
 
     private func updateAndSavedIndexes(with dbName: String, noDBIndexes: [String]?){
         let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
+        var noDBIndexes = noDBIndexes
+        noDBIndexes?.append(NoDBConstant.id.rawValue)
         for (index, indexObj) in (indexesNamesSaved[savedIndexsDBName] ?? []).enumerated() {
             guard let indexValue = indexObj[NoDBConstant.indexSaved.rawValue] as? String else {
                 continue
