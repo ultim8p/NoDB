@@ -61,6 +61,12 @@ public func >(lhs: String, rhs: Any) -> Query {
 public func <(lhs: String, rhs: Any) -> Query {
     return Query(op: .lowerThan, key: lhs, value: rhs)
 }
+public func >=(lhs: String, rhs: Any) -> Query {
+    return Query(op: .greaterThanOrEqual, key: lhs, value: rhs)
+}
+public func <=(lhs: String, rhs: Any) -> Query {
+    return Query(op: .lowerThanOrEqual, key: lhs, value: rhs)
+}
 
 public func &&(lhs: Query, rhs: Query) -> QueryAnd {
     return QueryAnd(queries: [lhs, rhs])
