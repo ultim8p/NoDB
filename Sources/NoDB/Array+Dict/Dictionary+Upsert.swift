@@ -15,15 +15,15 @@ extension Array where Element == [String: Any] {
     ///     - dict: Dictionary to either insert or replace.
     ///     - key: Key to chech wheather the value already existed.
     @discardableResult
-    mutating func upsert(_ dict: Element, key: String) -> Int? {
+    mutating func upsert(_ dict: Element, key: String) -> (currentIndex: Int?, insertingIndex: Int?)? {
         guard let value = dict[key] else { return nil }
         let indexQ = self.binarySearch(key: key, value: value)
         if let itemIndex = indexQ.currentIndex {
             self[itemIndex] = dict
-            return itemIndex
+            return (itemIndex, nil)
         } else if let insertIndex = indexQ.insertInIndex {
             self.insert(dict, at: insertIndex)
-            return insertIndex
+            return (nil, insertIndex)
         }
         return nil
     }

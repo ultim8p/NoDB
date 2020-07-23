@@ -10,16 +10,16 @@ import Foundation
 extension Array where Element: DBModel {
     
     mutating func save(_ objs: [Element?], withDBName dbName: String, idKey: String) -> [Element]? {
-        var savedIdsDict: [[String:Any]] = []
+        var savedIds: [[String: Any]] = []
         var elementsSaved: [Element] = []
         for obj in objs {
             guard let saveResult = self.save(obj, withDBName: dbName, idKey: idKey) else { continue }
             let idDict: [String: Any] = [idKey: saveResult.noDBId]
-            guard let upsertedInIndex = savedIdsDict.upsert(idDict, key: idKey) else { continue }
-            if upsertedInIndex < elementsSaved.count {
-                elementsSaved[upsertedInIndex] = saveResult.element
-            } else {
-                elementsSaved.append(saveResult.element)
+            guard let upsertedInIndex = savedIds.upsert(idDict, key: idKey) else { continue }
+            if let upserCurrentIndex = upsertedInIndex.currentIndex, upserCurrentIndex < elementsSaved.count {
+                elementsSaved[upserCurrentIndex] = saveResult.element
+            } else if let insertedIndex = upsertedInIndex.insertingIndex {
+                elementsSaved.insert(saveResult.element, at: insertedIndex)
             }
         }
         return elementsSaved
