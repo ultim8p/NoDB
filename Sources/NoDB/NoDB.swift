@@ -142,7 +142,27 @@ open class NoDB<T: DBModel> {
                 completion?(nil)
                 return
             }
-            completion?(self.objects.searchRange(with: key, value: value, withOp: operatr, limit: limit, skip: skip, withDBName: self.name))
+            completion?(self.objects.searchRange(with: key, value: value, operatr: operatr, limit: limit, skip: skip, withDBName: self.name))
+        }
+    }
+    
+    public func searchObjs(withKey key: String, value: Any, withOp operatr: LowerOperator, completion: completion?) {
+        queue.async { [weak self] in
+            guard let self = self else {
+                completion?(nil)
+                return
+            }
+            completion?(self.objects.searchRange(with: key, value: value, operatr: operatr, withDBName: self.name))
+        }
+    }
+    
+    public func searchObjs(withKey key: String, value: Any, withOp operatr: UpperOperator, completion: completion?) {
+        queue.async { [weak self] in
+            guard let self = self else {
+                completion?(nil)
+                return
+            }
+            completion?(self.objects.searchRange(with: key, value: value, operatr: operatr, withDBName: self.name))
         }
     }
     

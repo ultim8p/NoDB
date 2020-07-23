@@ -123,7 +123,21 @@ extension Array where Element: DBModel {
         return getObjects(for: indexsResults)
     }
     
-    func searchRange(with key: String, value: Any, withOp operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, withDBName dbName: String) -> [Element]? {
+    func searchRange(with key: String, value: Any, operatr: LowerOperator, withDBName dbName: String) -> [Element]? {
+        let indexDBName = dbName + ":" + key
+        guard let indexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
+        guard let indexsResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
+        return getObjects(for: indexsResults)
+    }
+    
+    func searchRange(with key: String, value: Any, operatr: UpperOperator, withDBName dbName: String) -> [Element]? {
+        let indexDBName = dbName + ":" + key
+        guard let indexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
+        guard let indexsResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
+        return getObjects(for: indexsResults)
+    }
+    
+    func searchRange(with key: String, value: Any, operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, withDBName dbName: String) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
         guard let indexsResults = indexes.searchRange(with: key, value: value, withOp: operatr, limit: limit, skip: skip) else { return nil }
