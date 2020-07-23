@@ -8,90 +8,6 @@
 import Foundation
 import BinarySearch
 
-public struct ResultCursor {
-    var result: [Int]
-    
-}
-
-// MARK: Query
-public protocol QueryUnion {
-    var queries: [Query]? { get set }
-}
-public struct QueryOr: QueryUnion {
-    public var queries: [Query]?
-}
-public struct QueryAnd: QueryUnion {
-    public var queries: [Query]?
-}
-
-enum QueryOperator {
-    case equal
-    case greaterThan
-    case greaterThanOrEqual
-    case lowerThan
-    case lowerThanOrEqual
-}
-
-public struct Query {
-    var op: QueryOperator?
-    var key: String?
-    var value: Any?
-    
-    static func all() -> Query {
-        return Query()
-    }
-}
-
-// MARK: SORT
-public enum SortOrder {
-    case ascending
-    case descending
-}
-public struct Sort {
-    public var key: String
-    public var order: SortOrder
-    
-    public init(key: String, order: SortOrder) {
-        self.key = key
-        self.order = order
-    }
-}
-
-public func ==(lhs: String, rhs: Any) -> Query {
-    return Query(op: .equal, key: lhs, value: rhs)
-}
-public func >(lhs: String, rhs: Any) -> Query {
-    return Query(op: .greaterThan, key: lhs, value: rhs)
-}
-public func <(lhs: String, rhs: Any) -> Query {
-    return Query(op: .lowerThan, key: lhs, value: rhs)
-}
-public func >=(lhs: String, rhs: Any) -> Query {
-    return Query(op: .greaterThanOrEqual, key: lhs, value: rhs)
-}
-public func <=(lhs: String, rhs: Any) -> Query {
-    return Query(op: .lowerThanOrEqual, key: lhs, value: rhs)
-}
-
-public func &&(lhs: Query, rhs: Query) -> QueryAnd {
-    return QueryAnd(queries: [lhs, rhs])
-}
-
-public func &&(lhs: QueryAnd, rhs: Query) -> QueryAnd {
-    var andQuery = lhs
-    var queries = andQuery.queries ?? []
-    queries.append(rhs)
-    andQuery.queries = queries
-    return andQuery
-}
-
-func testQuery() {
-    
-    let query = "age" == 24 && "hairColor" == "black" && "dateCreated" == Date()
-    
-    
-}
-
 // RangeIndexes
 public extension Array where Element == [String: Any] {
     /// Find the start index in the array with a skip count.
@@ -124,6 +40,7 @@ public extension Array where Element == [String: Any] {
         return Array(self[start...end])
     }
 }
+
 public extension Array where Element: DBModel {
     /// Find the start index in the array with a skip count.
     /// Validates that the start index is still within the array.
@@ -186,8 +103,9 @@ public extension Array where Element: DBModel {
     ///     - query: Query to execute to find objects
     ///     - dbName: Name of the Database to perform the query on.
     ///
-    func find(_ query: Query, dbName: String, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil) -> [Element]? {
+    func find(_ query: Query?, dbName: String, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil) -> [Element]? {
         guard let queryIndexes = findIndexes(for: query, dbName: dbName) else { return nil }
+        print("FOUND INDEXES COUNT: \(queryIndexes.count)")
         return getElemetResults(for: queryIndexes, sort: sort, skip: skip, limit: limit)
     }
     
@@ -208,12 +126,12 @@ public extension Array where Element: DBModel {
     ///     - query: Query containing search parameters to find the list of indexes.
     ///     - dbName: Name of the database to perform the query on.
     /// - Returns: List of index dictionaries that matched the query.
-    private func findIndexes(for query: Query, dbName: String) -> [[String: Any]]? {
-        guard let key = query.key,
-            let val = query.value,
-            let op = query.op else {
+    private func findIndexes(for query: Query?, dbName: String) -> [[String: Any]]? {
+        guard let key = query?.key,
+            let val = query?.value,
+            let op = query?.op else {
                 // If query has no properties, find all
-                let indexDBName = dbName + ":" + "_id"
+                let indexDBName = dbName + ":" + NoDBConstant.id.rawValue
                 return IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName)
         }
         

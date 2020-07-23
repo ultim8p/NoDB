@@ -16,7 +16,7 @@ enum IndexesNameType {
         case .deleted:
             return dbName + ":" + "deleted"
         case .savedIndexes:
-            return "indexes" + ":" + dbName
+            return dbName + ":" + "indexes"
         }
     }
 }

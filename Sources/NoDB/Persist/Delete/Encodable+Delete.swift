@@ -14,6 +14,7 @@ extension Array where Element: Encodable {
         _ = self.deleteDB(fileName)
     }
     
+    @discardableResult
     mutating func deleteDB(_ name: String) -> Bool {
         if RIArchiever.delete(fileName: name) == nil {
             self = []

@@ -28,19 +28,25 @@ class IndexesManager {
         }
     }
     
-    func insert(in type: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
+    /// Inserts a new index dictionary into the specified index database.
+    /// - Parameters:
+    ///     - indexType: Type of the index to be inserted in the database.
+    ///     - indexDBName: Name of the index database in which the new index dictionary will be inserted to.
+    ///     - sortKey: Key name by which indexes are sorted. All indexed dictionaries must have a value for this key.
+    ///     - indexDict: Dictionary representing the index to be inserted.
+    func insert(indexType: IndexesType = .indexes, indexDBName: String, sortKey: String, indexDict: [String: Any]) {
         queue.sync {
-            switch type {
+            switch indexType {
             case .indexes:
                 if indexes[indexDBName] == nil {
                     indexes[indexDBName] = []
                 }
-                self.indexes[indexDBName]?.insert(indexDict, key: key)
+                self.indexes[indexDBName]?.insert(indexDict, key: sortKey)
             case .deletions:
                 if deletions[indexDBName] == nil {
                     deletions[indexDBName] = []
                 }
-                deletions[indexDBName]?.insert(indexDict, key: key)
+                deletions[indexDBName]?.insert(indexDict, key: sortKey)
             }
         }
     }
@@ -54,13 +60,13 @@ class IndexesManager {
         }
     }
     
-    func delete(in type: IndexesType = .indexes, indexDBName: String, indexDict: [String: Any], key: String) {
+    func delete(indexType: IndexesType = .indexes, indexDBName: String, sortKey: String, indexDict: [String: Any]) {
         queue.sync {
-            switch type {
+            switch indexType {
             case .indexes:
-                indexes[indexDBName]?.delete(indexDict, key: key)
+                indexes[indexDBName]?.delete(indexDict, key: sortKey)
             case .deletions:
-                deletions[indexDBName]?.delete(indexDict, key: key)
+                deletions[indexDBName]?.delete(indexDict, key: sortKey)
             }
         }
     }

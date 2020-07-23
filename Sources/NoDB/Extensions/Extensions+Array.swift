@@ -10,7 +10,11 @@ import Mergeable
 
 extension Array where Element == [String: Any] {
         
-    /// Returns the "index" value for the dictionary found with this key value.
+    /// Searches for a dictionary in this array and returns the value for "index" key in the dictionary.
+    /// - Parameters:
+    ///     - key: Name of the key to search for.
+    ///     - value: Value for the key to search for.
+    /// - Returns: Value of the "index" key in the dictionary.
     func indexValue(for key: String, value: Any) -> Int? {
         guard let indexedDict = indexedDict(with: key, value: value),
             let index = indexedDict[NoDBConstant.index.rawValue] as? Int else { return nil }

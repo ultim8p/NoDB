@@ -9,34 +9,6 @@
 import Foundation
 import BinarySearch
 
-extension Array where Element: DBModel {
-
-    mutating func save(_ obj: inout Element?, withDBName dbName: String) {
-        guard var copyObj = obj, let id = copyObj._id, !id.isEmpty else {
-            obj = nil
-            return
-        }
-        let binaryObj = objectAndIndex(withId: id, withDBName: dbName)
-        if var oldObj = binaryObj.obj, let objIndex = binaryObj.index {
-            let oldObjCopy = oldObj
-            if let changes = oldObj.merge(Element.self, with: copyObj) {
-                oldObjCopy.updateIndexes(with: changes, withDBName: dbName)
-            }
-            obj = oldObj
-            self[objIndex] = oldObj
-        } else {
-            if self.isEmpty {
-                copyObj.saveIndexesList(withDBName: dbName)
-            }
-            let index = self.getIndexForInsertion(withDBName: dbName)
-            copyObj.noDBIndex = index
-            self.insert(copyObj, at: index)
-            copyObj.insertIndexes(withDBName: dbName)
-            obj = copyObj
-        }
-    }
-
-}
 
 extension DBModel {
     static var dbName: String {
@@ -44,24 +16,24 @@ extension DBModel {
     }
     
     //Just call this method when ypu know FOR SURE that new indexes should be created
-    func insertIndexes(withDBName dbName: String) {
+    func insertIndexes(withDBName dbName: String, idKey: String) {
         let indexes = type(of: self).noDBIndexes
-        indexes?.insertIndexes(for: self, withDBName: dbName)
+        indexes?.insertIndexes(for: self, withDBName: dbName, idKey: idKey)
     }
     
-    func upsertIndexes(withDBName dbName: String) {
+//    func upsertIndexes(withDBName dbName: String) {
+//        let indexes = type(of: self).noDBIndexes
+//        indexes?.upsertIndexes(for: self, withDBName: dbName)
+//    }
+    
+    func updateIndexes(with newObj: Self, withDBName dbName: String, idKey: String) {
         let indexes = type(of: self).noDBIndexes
-        indexes?.upsertIndexes(for: self, withDBName: dbName)
+        indexes?.updateIndexes(for: self, newObj: newObj, withDBName: dbName, idKey: idKey)
     }
     
-    func updateIndexes(with newObj: Self, withDBName dbName: String) {
+    func deleteIndexes(withDBName dbName: String, idKey: String) {
         let indexes = type(of: self).noDBIndexes
-        indexes?.updateIndexes(for: self, newObj: newObj, withDBName: dbName)
-    }
-    
-    func deleteIndexes(withDBName dbName: String) {
-        let indexes = type(of: self).noDBIndexes
-        indexes?.deleteIndexes(for: self, withDBName: dbName)
+        indexes?.deleteIndexes(for: self, withDBName: dbName, idKey: idKey)
     }
 
     func updateIndexes(forIndexsAt indexs: [Int], withDBName dbName: String){
@@ -76,86 +48,119 @@ extension DBModel {
 }
 
 extension Array where Element: DBModel {
-    func object(withId objId: String, withDBName dbName: String) -> Element? {
-        return self.object(with: "_id", value: objId, withDBName: dbName)
+    
+    /// Find an object in the array with a specific id.
+    /// - Parameters:
+    ///     - withId: Id value of the object to find.
+    ///     - dbName: Name of the database to search the object for.
+    /// - Returns: Object found for the specified id.
+    func object(withId objId: String, dbName: String) -> Element? {
+        return self.object(with: NoDBConstant.id.rawValue,
+                           value: objId,
+                           dbName: dbName)
     }
     
-    func objectAndIndex(withId objId: String, withDBName dbName: String) -> (obj: Element?, index: Int?) {
-        let key = "_id"
-        return self.objectAndIndex(with: key, value: objId, withDBName: dbName)
+    /// Find an object and it's position index in the array with a specific id.
+    /// - Parameters:
+    ///     - withId: Id value of the object to find.
+    ///     - dbName: Name of the database to search the object for.
+    /// - Returns: Object found for the specified id.
+    /// - Returns: Index of the element found in this array.
+    func objectAndIndex(withId objId: String, dbName: String) -> (obj: Element?, index: Int?) {
+        return self.objectAndIndex(with: NoDBConstant.id.rawValue,
+                                   value: objId,
+                                   dbName: dbName)
     }
     
-    func object(with key: String, value: Any, withDBName dbName: String) -> Element? {
-        guard let indexes = self.indexes(for: key, withDBName: dbName),
+    /// Find an object with a specific key value pair in this array.
+    /// - Parameters:
+    ///     - key: Name of the key to search the value for.
+    ///     - value: Value of the key.
+    ///     - dbName: Name of the database to search the object for.
+    /// - Returns: Object found for the specified key value pair.
+    func object(with key: String, value: Any, dbName: String) -> Element? {
+        guard let indexes = self.indexes(for: key, dbName: dbName),
             let indexValue = indexes.indexValue(for: key, value: value) else { return nil }
         return self[indexValue]
     }
     
-    func objectAndIndex(with key: String, value: Any, withDBName dbName: String) -> (obj: Element?, index: Int?) {
-        guard let indexes = self.indexes(for: key, withDBName: dbName),
+    /// Find an object and it's position index with a specific key value pair in this array.
+    /// - Parameters:
+    ///     - key: Name of the key to search the value for.
+    ///     - value: Value of the key.
+    ///     - dbName: Name of the database to search the object for.
+    /// - Returns: Object found for the specified key value pair.
+    /// - Returns: Index of the object found in this array.
+    func objectAndIndex(with key: String, value: Any, dbName: String) -> (obj: Element?, index: Int?) {
+        guard let indexes = self.indexes(for: key, dbName: dbName),
             let indexValue = indexes.indexValue(for: key, value: value) else { return (nil, nil) }
         return (self[indexValue], indexValue)
     }
     
-    func indexes(for key: String, withDBName dbName: String) -> [[String: Any]]? {
+    /// Returns the array of indexes for a specified key and database name.
+    /// - Parameters:
+    ///     - key: Name of the key for the indexes.
+    ///     - dbName: Name of the database of the indexes.
+    /// - Returns: Array of indexes for the specified key and database name.
+    func indexes(for key: String, dbName: String) -> [[String: Any]]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
         return indexes
     }
     
+    
+    /// Finds the index in which a new object should be inserted in the array.
+    /// If the deletions database contains at least one object, the new object will occupy the postion of the first item in deleted indexes database.
+    /// - Parameters:
+    ///     - dbName: Name of the database of the mode.
     func getIndexForInsertion(withDBName dbName: String) -> Int {
         let indexDBName = IndexesNameType.deleted.getFullName(with: dbName)
-        guard let deletions = IndexesManager.shared.get(withType: .deletions, indexDBName: indexDBName), let first = deletions.first, let index = first[NoDBConstant.index.rawValue] as? Int else { return self.count }
-        IndexesManager.shared.delete(in: .deletions, indexDBName: indexDBName, indexDict: first, key: "_id")
+        guard let deletions = IndexesManager.shared.get(withType: .deletions,
+                                                        indexDBName: indexDBName),
+            let deletedIndexDict = deletions.first,
+            let index = deletedIndexDict[NoDBConstant.index.rawValue] as? Int else { return self.count }
+        IndexesManager.shared.delete(indexType: .deletions,
+                                     indexDBName: indexDBName,
+                                     sortKey: NoDBConstant.id.rawValue,
+                                     indexDict: deletedIndexDict)
         return index
     }
     
-    func countValid(withDBName dbName: String) -> Int {
-        let indexDBName = IndexesNameType.deleted.getFullName(with: dbName)
-        guard let deletions = IndexesManager.shared.get(withType: .deletions, indexDBName: indexDBName) else { return self.count }
-        return self.count - deletions.count
-    }
     
+    // TODO: Refactor core search methods.
     func searchRange(with key: String, lowerValue: Any, lowerOpt: LowerOperator, upperValue: Any, upperOpt: UpperOperator, limit: Int?, bound: Bound, withDBName dbName: String) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
-        guard let indexsResults = indexes.searchRange(with: key, lowerValue: lowerValue, lowerOpt: lowerOpt, upperValue: upperValue, upperOpt: upperOpt, limit: limit, bound: bound) else { return nil}
-        return getObjects(for: indexsResults)
+        guard let indexesResults = indexes.searchRange(with: key, lowerValue: lowerValue, lowerOpt: lowerOpt, upperValue: upperValue, upperOpt: upperOpt, limit: limit, bound: bound) else { return nil}
+        return models(fromIndexes: indexesResults)
     }
     
     func searchRange(with key: String, value: Any, operatr: LowerOperator, withDBName dbName: String) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
-        guard let indexsResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
-        return getObjects(for: indexsResults)
+        guard let indexesResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
+        return models(fromIndexes: indexesResults)
     }
     
     func searchRange(with key: String, value: Any, operatr: UpperOperator, withDBName dbName: String) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
-        guard let indexsResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
-        return getObjects(for: indexsResults)
+        guard let indexesResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
+        return models(fromIndexes: indexesResults)
     }
     
     func searchRange(with key: String, value: Any, operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, withDBName dbName: String) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
-        guard let indexsResults = indexes.searchRange(with: key, value: value, withOp: operatr, limit: limit, skip: skip) else { return nil }
-        return getObjects(for: indexsResults)
+        guard let indexesResults = indexes.searchRange(with: key, value: value, withOp: operatr, limit: limit, skip: skip) else { return nil }
+        return models(fromIndexes: indexesResults)
     }
     
+    // TODO: Replace by find() method
     func getAllValid(withDBName dbName: String) -> [Element]? {
-        let indexDBName = dbName + ":" + "_id"
+        let indexDBName = dbName + ":" + NoDBConstant.id.rawValue
         guard let indexesRsults = IndexesManager.shared.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
-        return getObjects(for: indexesRsults)
+        return models(fromIndexes: indexesRsults)
     }
     
-    func getObjects(for indexArray: [[String: Any]]) -> [Element] {
-        var results: [Element] = []
-        for result in indexArray {
-            guard let indexValue = result.indexValue() else { continue }
-            results.append(self[indexValue])
-        }
-        return results
-    }
 }
