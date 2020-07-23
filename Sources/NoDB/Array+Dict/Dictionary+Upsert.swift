@@ -14,13 +14,17 @@ extension Array where Element == [String: Any] {
     /// - Parameters:
     ///     - dict: Dictionary to either insert or replace.
     ///     - key: Key to chech wheather the value already existed.
-    mutating func upsert(_ dict: Element, key: String) {
-        guard let value = dict[key] else { return }
+    @discardableResult
+    mutating func upsert(_ dict: Element, key: String) -> Int? {
+        guard let value = dict[key] else { return nil }
         let indexQ = self.binarySearch(key: key, value: value)
         if let itemIndex = indexQ.currentIndex {
             self[itemIndex] = dict
+            return itemIndex
         } else if let insertIndex = indexQ.insertInIndex {
             self.insert(dict, at: insertIndex)
+            return insertIndex
         }
+        return nil
     }
 }

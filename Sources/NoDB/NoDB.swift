@@ -18,7 +18,7 @@ open class NoDB<T: DBModel> {
     public typealias completion = ([T]?) -> ()
     public typealias countHandler = (Int) -> ()
     public typealias onSingleCompletion = (T?) -> ()
-    public typealias onMultCompletion = ([T?]) -> ()
+    public typealias onMultCompletion = ([T]?) -> ()
     
     public init(name: String? = nil, idKey: String = "id") {
         self.name = name ?? T.dbName
@@ -54,27 +54,24 @@ open class NoDB<T: DBModel> {
         }
     }
     
+    public func save(obj: [T], completion: onMultCompletion? = nil) {
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            let objsSaved = self.objects.save(obj, withDBName: self.name, idKey: self.idKey)
+            completion?(objsSaved)
+        }
+    }
+    
     public func save(obj: T, completion: onSingleCompletion? = nil) {
-        save(obj: [obj]) { (objs) in
-            guard let first = objs.first else { completion?(nil)
+        save(obj: [obj]) { objs in
+            guard let first = objs?.first else {
+                completion?(nil)
                 return
             }
             completion?(first)
         }
     }
-    
-    public func save(obj: [T], completion: onMultCompletion? = nil) {
-        queue.async { [weak self] in
-            guard let self = self else { return }
-            var objsAdded: [T?] = []
-            for obj in obj {
-                var obj: T? = obj
-                self.objects.save(&obj, withDBName: self.name, idKey: self.idKey)
-                objsAdded.append(obj)
-            }
-            completion?(objsAdded)
-        }
-    }
+
     
     // TODO: Add delete function based on key values
     /// Deletes a single object from the database using the id key.
