@@ -14,7 +14,7 @@ extension Array where Element == String {
     ///     - obj: Model object from which to extract index values from.
     ///     - dbName: Database name in which the object is being stored. Index databases have related names to this value.
     ///     - idKey: Id property name of the object. We will extract the value for the object's id using this key.
-    func insertIndexes<T: DBModel>(for obj: T, withDBName dbName: String, idKey: String) {
+    func insertIndexes<T: DBModel>(for obj: T, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
         let objDict = obj.toDictionary()
         let noDBIndexKey = NoDBConstant.index.rawValue
         let noDBIdKey = NoDBConstant.id.rawValue
@@ -27,20 +27,15 @@ extension Array where Element == String {
             if let indexPropertyVal = objDict[indexKey] {
                 let dictObj: [String: Any] = [indexKey: indexPropertyVal,
                                               noDBIndexKey: objIndex]
-                IndexesManager.shared.insert(indexDBName: indexDBName, sortKey: indexKey, indexDict: dictObj)
+                indexesManager.insert(indexDBName: indexDBName, sortKey: indexKey, indexDict: dictObj)
             }
         }
         
         // Automatically index noDBId for all objects.
         let idIndexDict: [String: Any] = [noDBIdKey: objId,
                                           noDBIndexKey: objIndex]
-        IndexesManager.shared.insert(indexDBName: dbName + ":" + noDBIdKey,
-                                     sortKey: noDBIdKey,
-                                     indexDict: idIndexDict)
-        
-        
-        let indexesDBName = dbName + ":" + noDBIdKey
-        
-        let idIndexes = IndexesManager.shared.get(withType: .indexes, indexDBName: indexesDBName)
+        indexesManager.insert(indexDBName: dbName + ":" + noDBIdKey,
+                              sortKey: noDBIdKey,
+                              indexDict: idIndexDict)
     }
 }

@@ -11,8 +11,4 @@ public struct Query {
     var op: QueryOperator?
     var key: String?
     var value: Any?
-    
-    static func all() -> Query {
-        return Query()
-    }
 }
