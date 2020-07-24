@@ -17,25 +17,33 @@ public extension Array where Element == [String: Any] {
     /// - Returns: Valid index after skipping the count.
     func startIndex(skip: Int?) -> Int {
         var startIndex = 0
-        startIndex += skip ?? 0
-        return Swift.min(startIndex, self.count - 1)
+        startIndex += Swift.max(skip ?? 0, 0)
+        return Swift.min(startIndex, Swift.max(0, self.count - 1))
     }
-    func endIndex(skip: Int?, limit: Int?) -> Int {
+    
+    /// Returns an end index for a range in the list of elements based on a skip count and limit count.
+    /// If limit is a negative value (-) the method will return nul, meaning the range should contain zero elements.
+    func endIndex(skip: Int?, limit: Int?) -> Int? {
         let maxIndex = self.count - 1
         var end = maxIndex
         if let limit = limit {
+            guard limit > 0 else {
+                return nil
+            }
             let start = startIndex(skip: skip)
             end = start + limit
             end = Swift.min(end, maxIndex)
         }
         return end
     }
+    
     func range(skip: Int?, limit: Int?) -> [[String: Any]]? {
         let startRange = startIndex(skip: skip)
-        let endRange = endIndex(skip: skip, limit: limit)
+        guard let endRange = endIndex(skip: skip, limit: limit) else { return nil }
         guard startRange <= endRange else { return nil }
         return range(start: startRange, end: endRange)
     }
+    
     func range(start: Int, end: Int) -> [[String: Any]]? {
         return Array(self[start...end])
     }
@@ -49,22 +57,27 @@ public extension Array where Element: DBModel {
     /// - Returns: Valid index after skipping the count.
     func startIndex(skip: Int?) -> Int {
         var startIndex = 0
-        startIndex += skip ?? 0
-        return Swift.min(startIndex, self.count - 1)
+        startIndex += Swift.max(skip ?? 0, 0)
+        return Swift.min(startIndex, Swift.max(0, self.count - 1))
     }
-    func endIndex(skip: Int?, limit: Int?) -> Int {
+    
+    func endIndex(skip: Int?, limit: Int?) -> Int? {
         let maxIndex = self.count - 1
         var end = maxIndex
         if let limit = limit {
+            guard limit > 0 else {
+                return nil
+            }
             let start = startIndex(skip: skip)
             end = start + limit
             end = Swift.min(end, maxIndex)
         }
         return end
     }
+    
     func range(skip: Int?, limit: Int?) -> [Element]? {
         let startRange = startIndex(skip: skip)
-        let endRange = endIndex(skip: skip, limit: limit)
+        guard let endRange = endIndex(skip: skip, limit: limit) else { return nil }
         guard startRange <= endRange else { return nil }
         return range(start: startRange, end: endRange)
     }

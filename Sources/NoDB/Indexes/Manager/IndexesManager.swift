@@ -107,11 +107,14 @@ class IndexesManager {
     func deleteDB(with dbName: String, noDBIndexes: [String]?) {
         queue.sync {
             let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
-                _ = indexesNamesSaved[savedIndexsDBName]?.deleteDB(savedIndexsDBName)
-            for key in noDBIndexes ?? [] {
-                let keyName = dbName + ":" + key
+            for indexObj in indexesNamesSaved[savedIndexsDBName] ?? [] {
+                guard let indexValue = indexObj[NoDBConstant.indexSaved.rawValue] as? String else {
+                    continue
+                }
+                let keyName = dbName + ":" + indexValue
                 indexes[keyName]?.deleteDB(keyName)
             }
+            _ = indexesNamesSaved[savedIndexsDBName]?.deleteDB(savedIndexsDBName)
             let deletedIndexsDBName = IndexesNameType.deleted.getFullName(with: dbName)
                 deletions[deletedIndexsDBName]?.deleteDB(deletedIndexsDBName)
         }
