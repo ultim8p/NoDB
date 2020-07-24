@@ -9,10 +9,10 @@ import Foundation
 
 extension Array where Element == String {
     
-    func saveIndexList<T: DBModel>(for obj: T, withDBName dbName: String) {
+    func saveIndexList<T: DBModel>(for obj: T, withDBName dbName: String, indexesManager: IndexesManager) {
         for indexName in self {
-            IndexesManager.shared.insertToSavedIndexes(with: dbName, indexName: indexName)
+            indexesManager.insertToSavedIndexes(with: dbName, indexName: indexName)
         }
-        IndexesManager.shared.insertToSavedIndexes(with: dbName, indexName: NoDBConstant.id.rawValue)
+        indexesManager.insertToSavedIndexes(with: dbName, indexName: NoDBConstant.id.rawValue)
     }
 }

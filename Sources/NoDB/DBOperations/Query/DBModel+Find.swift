@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension Array where Element: DBModel {
+extension Array where Element: DBModel {
 //    func find<Q: QueryUnion>(_ queryUnion: Q) -> [Element]? {
 //
 //    }
@@ -17,8 +17,8 @@ public extension Array where Element: DBModel {
     ///     - query: Query to execute to find objects
     ///     - dbName: Name of the Database to perform the query on.
     ///
-    func find(_ query: Query?, dbName: String, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, idKey: String) -> [Element]? {
-        guard let queryIndexes = findIndexes(for: query, dbName: dbName, idKey: idKey) else { return nil }
+    func find(_ query: Query?, dbName: String, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, idKey: String, indexesManager: IndexesManager) -> [Element]? {
+        guard let queryIndexes = findIndexes(for: query, dbName: dbName, idKey: idKey, indexesManager: indexesManager) else { return nil }
         return getElemetResults(for: queryIndexes, sort: sort, skip: skip, limit: limit)
     }
 }

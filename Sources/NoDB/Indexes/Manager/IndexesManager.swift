@@ -1,15 +1,14 @@
 //
-//  IndexesManager.swift
-//  RIDB
+//  File.swift
+//  
 //
-//  Created by Ita on 6/21/20.
-//  Copyright © 2020 rise. All rights reserved.
+//  Created by Guerson on 2020-07-24.
 //
 
 import Foundation
 
 class IndexesManager {
-    static var shared = IndexesManager()
+
     private let queue = DispatchQueue(customType: .indexesManager)
 
     private var indexesNamesSaved: [String: [[String: Any]]] = [:]

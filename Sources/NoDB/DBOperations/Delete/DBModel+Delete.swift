@@ -22,23 +22,23 @@ extension Array where Element: DBModel {
 //    }
     
     /// Deletes all objects that match a specified Query.
-    func delete(_ query: Query, dbName: String, idKey: String) -> [Element]? {
-        guard let deletingObjs = find(query, dbName: dbName, idKey: idKey) else { return nil }
+    func delete(_ query: Query, dbName: String, idKey: String, indexesManager: IndexesManager) -> [Element]? {
+        guard let deletingObjs = find(query, dbName: dbName, idKey: idKey, indexesManager: indexesManager) else { return nil }
         for obj in deletingObjs {
             if let objId = obj.modelStringValue(for: idKey) {
-                delete(id: objId, withDBName: dbName, idKey: idKey)
+                delete(id: objId, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
             }
         }
         return deletingObjs
     }
     
     /// Deletes an object with a specified id.
-    func delete(id: String?, withDBName dbName: String, idKey: String) {
+    func delete(id: String?, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
         guard let id = id else {
             return
         }
-        let binaryObj = objectAndIndex(withId: id, dbName: dbName)
+        let binaryObj = objectAndIndex(withId: id, dbName: dbName, indexesManager: indexesManager)
         guard let oldObj = binaryObj.obj, let _ = binaryObj.index else { return }
-        oldObj.deleteIndexes(withDBName: dbName, idKey: idKey)
+        oldObj.deleteIndexes(withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
     }
 }

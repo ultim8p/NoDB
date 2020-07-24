@@ -9,7 +9,7 @@ import Foundation
 
 extension Array where Element == String {
     
-    func updateIndexes<T: DBModel>(for obj: T, newObj: T, withDBName dbName: String, idKey: String) {
+    func updateIndexes<T: DBModel>(for obj: T, newObj: T, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
         let objDict = obj.toDictionary()
         let newObjDict = newObj.toDictionary()
         let noDBIndexKey = NoDBConstant.index.rawValue
@@ -22,13 +22,13 @@ extension Array where Element == String {
                 if let indexVal = objDict[indexKey] {
                     let dictObj: [String: Any] = [indexKey: indexVal,
                                                   noDBIndexKey: objIndex]
-                    IndexesManager.shared.delete(indexDBName: indexDBName,
+                    indexesManager.delete(indexDBName: indexDBName,
                                                  sortKey: indexKey,
                                                  indexDict: dictObj)
                 }
                 let newDictObj: [String: Any] = [indexKey: newIndexVal,
                                                  noDBIndexKey: objIndex]
-                IndexesManager.shared.insert(indexDBName: indexDBName,
+                indexesManager.insert(indexDBName: indexDBName,
                                              sortKey: indexKey,
                                              indexDict: newDictObj)
             }
@@ -38,7 +38,7 @@ extension Array where Element == String {
         // We shouldn't since changing the id value of the object would mean it is a new object.
     }
     
-    func updateIndex<T: DBModel>(for obj: T, forIndexsAt indexs: [Int], withDBName dbName: String) {
+    func updateIndex<T: DBModel>(for obj: T, forIndexsAt indexs: [Int], withDBName dbName: String, indexesManager: IndexesManager) {
         for index in indexs {
             let indexKey = self[index]
             let objDict = obj.toDictionary()
@@ -46,9 +46,9 @@ extension Array where Element == String {
             let indexDBName =  dbName + ":" + indexKey
             let newDictObj: [String: Any] = [indexKey: indexVal,
                                              NoDBConstant.index.rawValue: objIndex]
-            IndexesManager.shared.insert(indexDBName: indexDBName,
-                                         sortKey: indexKey,
-                                         indexDict: newDictObj)
+            indexesManager.insert(indexDBName: indexDBName,
+                                  sortKey: indexKey,
+                                  indexDict: newDictObj)
         }
     }
 }

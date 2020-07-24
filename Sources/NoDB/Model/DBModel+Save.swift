@@ -9,11 +9,11 @@ import Foundation
 
 extension Array where Element: DBModel {
     
-    mutating func save(_ objs: [Element?], withDBName dbName: String, idKey: String) -> [Element]? {
+    mutating func save(_ objs: [Element?], withDBName dbName: String, idKey: String, indexesManager: IndexesManager) -> [Element]? {
         var savedIds: [[String: Any]] = []
         var elementsSaved: [Element] = []
         for obj in objs {
-            guard let saveResult = self.save(obj, withDBName: dbName, idKey: idKey) else { continue }
+            guard let saveResult = self.save(obj, withDBName: dbName, idKey: idKey, indexesManager: indexesManager) else { continue }
             let idDict: [String: Any] = [idKey: saveResult.noDBId]
             guard let upsertedInIndex = savedIds.upsert(idDict, key: idKey) else { continue }
             if let upserCurrentIndex = upsertedInIndex.currentIndex, upserCurrentIndex < elementsSaved.count {
@@ -31,28 +31,28 @@ extension Array where Element: DBModel {
     /// Indexing will be handled by using the defined indexable keys in the model's noDBIndexes property.
     /// Indexing will be used to perform high-performance operations in the database like query, delete and update.
     /// - Note: Objects must have an id in order to be saved. Objects with no id will be ignored. You can specify the name of the id property in the "idKey" parameter.
-    private mutating func save(_ obj: Element?, withDBName dbName: String, idKey: String) -> SaveModel<Element>? {
+    private mutating func save(_ obj: Element?, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) -> SaveModel<Element>? {
         guard var obj = obj,
             let id = obj.modelStringValue(for: idKey),
             !id.isEmpty else {
             return nil
         }
-        let binaryObj = objectAndIndex(withId: id, dbName: dbName)
+        let binaryObj = objectAndIndex(withId: id, dbName: dbName, indexesManager: indexesManager)
         if var oldObj = binaryObj.obj, let objIndex = binaryObj.index {
             let oldObjCopy = oldObj
             if let changes = oldObj.merge(Element.self, with: obj, idKey: idKey) {
-                oldObjCopy.updateIndexes(with: changes, withDBName: dbName, idKey: idKey)
+                oldObjCopy.updateIndexes(with: changes, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
             }
             self[objIndex] = oldObj
             return SaveModel(element: oldObj, noDBId: id)
         } else {
             if self.isEmpty {
-                obj.saveIndexesList(withDBName: dbName)
+                obj.saveIndexesList(withDBName: dbName, indexesManager: indexesManager)
             }
-            let index = self.getIndexForInsertion(withDBName: dbName)
+            let index = self.getIndexForInsertion(withDBName: dbName, indexesManager: indexesManager)
             obj.noDBIndex = index
             self.insert(obj, at: index)
-            obj.insertIndexes(withDBName: dbName, idKey: idKey)
+            obj.insertIndexes(withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
             return SaveModel(element: obj, noDBId: id)
         }
     }

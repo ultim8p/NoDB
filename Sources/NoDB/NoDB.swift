@@ -13,6 +13,7 @@ open class NoDB<T: DBModel> {
     
     private var objects: [T] = []
     private let queue = DispatchQueue(customType: .noDBQueue)
+    private var indexesManager = IndexesManager()
     public var name: String
     public var idKey: String
     
@@ -26,7 +27,7 @@ open class NoDB<T: DBModel> {
         queue.async { [weak self] in
             guard let self = self else { return }
             self.objects = [T].loadDB(self.name) ?? []
-            guard let newKeysIndexs = IndexesManager.shared.loadDB(withName: self.name, noDBIndexes: T.noDBIndexes) else { return }
+            guard let newKeysIndexs = self.indexesManager.loadDB(withName: self.name, noDBIndexes: T.noDBIndexes) else { return }
             self.loadNewIndexes(with: newKeysIndexs)
         }
     }
@@ -36,7 +37,7 @@ open class NoDB<T: DBModel> {
     public func find(_ query: Query?, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, completion: ModelsCompletion?) {
         queue.async { [weak self] in
             guard let self = self else { return }
-            let results = self.objects.find(query, dbName: self.name, sort: sort, skip: skip, limit: limit, idKey: self.idKey)
+            let results = self.objects.find(query, dbName: self.name, sort: sort, skip: skip, limit: limit, idKey: self.idKey, indexesManager: self.indexesManager)
             DispatchQueue.main.async {
                 completion?(results)
             }
@@ -48,7 +49,7 @@ open class NoDB<T: DBModel> {
     public func delete(_ query: Query, completion: ModelsCompletion? = nil) {
         queue.async { [weak self] in
             guard let self = self else { return }
-            let results = self.objects.delete(query, dbName: self.name, idKey: self.idKey)
+            let results = self.objects.delete(query, dbName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
             DispatchQueue.main.async {
                 completion?(results)
             }
@@ -68,7 +69,7 @@ open class NoDB<T: DBModel> {
     public func save(obj: [T], completion: ModelsCompletion? = nil) {
         queue.async { [weak self] in
             guard let self = self else { return }
-            let objsSaved = self.objects.save(obj, withDBName: self.name, idKey: self.idKey)
+            let objsSaved = self.objects.save(obj, withDBName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
             DispatchQueue.main.async {
                 completion?(objsSaved)
             }
@@ -81,7 +82,7 @@ open class NoDB<T: DBModel> {
         queue.async { [weak self] in
             guard let self = self else { return }
             self.objects.saveDB(self.name)
-            IndexesManager.shared.saveDB(with: self.name, noDBIndexes: T.noDBIndexes)
+            self.indexesManager.saveDB(with: self.name, noDBIndexes: T.noDBIndexes)
             DispatchQueue.main.async {
                 handler?()
             }
@@ -92,7 +93,7 @@ open class NoDB<T: DBModel> {
         queue.async { [weak self] in
             guard let self = self else { return }
             self.objects.deleteDB(self.name)
-            IndexesManager.shared.deleteDB(with: self.name, noDBIndexes: T.noDBIndexes)
+            self.indexesManager.deleteDB(with: self.name, noDBIndexes: T.noDBIndexes)
             DispatchQueue.main.async {
                 handler?()
             }
@@ -101,9 +102,9 @@ open class NoDB<T: DBModel> {
     
     
     private func loadNewIndexes(with positions: [Int]) {
-        guard let validObjs = self.objects.getAllValid(withDBName: self.name) else { return }
+        guard let validObjs = self.objects.getAllValid(withDBName: self.name, indexesManager: indexesManager) else { return }
         for obj in validObjs {
-            obj.updateIndexes(forIndexsAt: positions, withDBName: self.name)
+            obj.updateIndexes(forIndexsAt: positions, withDBName: self.name, indexesManager: indexesManager)
         }
     }
 }
