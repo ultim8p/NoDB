@@ -17,9 +17,9 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         
-        .package(url: "https://github.com/ultim8p/Mergeable", .branch("master")),
-        .package(url: "https://github.com/ultim8p/BinarySearch", .branch("master")),
-        .package(url: "https://github.com/ultim8p/CodableUtils", .branch("master"))
+        .package(url: "https://github.com/ultim8p/Mergeable", .upToNextMajor(from: "0.0.2")),
+        .package(url: "https://github.com/ultim8p/BinarySearch", .upToNextMajor(from: "0.0.2")),
+        .package(url: "https://github.com/ultim8p/CodableUtils", .upToNextMajor(from: "0.0.2"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
