@@ -38,9 +38,8 @@ extension Array where Element == String {
         // We shouldn't since changing the id value of the object would mean it is a new object.
     }
     
-    func updateIndex<T: DBModel>(for obj: T, forIndexsAt indexs: [Int], withDBName dbName: String, indexesManager: IndexesManager) {
-        for index in indexs {
-            let indexKey = self[index]
+    func updateIndex<T: DBModel>(for obj: T, newNoDBIndexes: [String], withDBName dbName: String, indexesManager: IndexesManager) {
+        for indexKey in newNoDBIndexes {
             let objDict = obj.toDictionary()
             guard let objIndex = objDict[NoDBConstant.index.rawValue], let indexVal = objDict[indexKey] else { return }
             let indexDBName =  dbName + ":" + indexKey

@@ -45,7 +45,14 @@ public extension Array where Element == [String: Any] {
     }
     
     func range(start: Int, end: Int) -> [[String: Any]]? {
-        return Array(self[start...end])
+        if self.rangeContains(index: start) && self.rangeContains(index: end) {
+            return Array(self[start...end])
+        }
+        return nil
+    }
+    
+    func rangeContains(index: Int) -> Bool {
+        return index >= 0 && index < self.count
     }
 }
 
@@ -82,7 +89,10 @@ public extension Array where Element: DBModel {
         return range(start: startRange, end: endRange)
     }
     func range(start: Int, end: Int) -> [Element]? {
-        return Array(self[start...end])
+        if self.rangeContains(index: start) && self.rangeContains(index: end) {
+            return Array(self[start...end])
+        }
+        return nil
     }
 }
 

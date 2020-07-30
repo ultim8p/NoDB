@@ -36,9 +36,9 @@ extension DBModel {
         indexes?.deleteIndexes(for: self, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
     }
 
-    func updateIndexes(forIndexsAt indexs: [Int], withDBName dbName: String, indexesManager: IndexesManager){
+    func updateIndexes(newNoDBIndexes: [String], withDBName dbName: String, indexesManager: IndexesManager){
         let indexes = type(of: self).noDBIndexes
-        indexes?.updateIndex(for: self, forIndexsAt: indexs, withDBName: dbName, indexesManager: indexesManager)
+        indexes?.updateIndex(for: self, newNoDBIndexes: newNoDBIndexes, withDBName: dbName, indexesManager: indexesManager)
     }
     
     func saveIndexesList(withDBName dbName: String, indexesManager: IndexesManager) {
@@ -82,7 +82,8 @@ extension Array where Element: DBModel {
     /// - Returns: Object found for the specified key value pair.
     func object(with key: String, value: Any, dbName: String, indexesManager: IndexesManager) -> Element? {
         guard let indexes = self.indexes(for: key, dbName: dbName, indexesManager: indexesManager),
-            let indexValue = indexes.indexValue(for: key, value: value) else { return nil }
+            let indexValue = indexes.indexValue(for: key, value: value),
+            self.rangeContains(index: indexValue) else { return nil }
         return self[indexValue]
     }
     
@@ -95,7 +96,8 @@ extension Array where Element: DBModel {
     /// - Returns: Index of the object found in this array.
     func objectAndIndex(with key: String, value: Any, dbName: String, indexesManager: IndexesManager) -> (obj: Element?, index: Int?) {
         guard let indexes = self.indexes(for: key, dbName: dbName, indexesManager: indexesManager),
-            let indexValue = indexes.indexValue(for: key, value: value) else { return (nil, nil) }
+            let indexValue = indexes.indexValue(for: key, value: value),
+            self.rangeContains(index: indexValue) else { return (nil, nil) }
         return (self[indexValue], indexValue)
     }
     
@@ -163,6 +165,10 @@ extension Array where Element: DBModel {
         let indexDBName = dbName + ":" + NoDBConstant.id.rawValue
         guard let indexesResults = indexesManager.get(withType: .indexes, indexDBName: indexDBName) else  { return nil }
         return models(fromIndexes: indexesResults)
+    }
+    
+    func rangeContains(index: Int) -> Bool {
+        return index >= 0 && index < self.count
     }
     
 }

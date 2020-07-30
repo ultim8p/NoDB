@@ -11,7 +11,7 @@ class IndexesManager {
 
     private let queue = DispatchQueue(customType: .indexesManager)
 
-    private var indexesNamesSaved: [String: [[String: Any]]] = [:]
+    private var noDBIndexesSaved: [[String: Any]] = []
     private var indexes: [String: [[String: Any]]] = [:]
     private var deletions: [String: [[String: Any]]] = [:]
     
@@ -70,26 +70,25 @@ class IndexesManager {
         }
     }
 
-    func loadDB(withName dbName: String, noDBIndexes: [String]?) -> [Int]? {
+    func loadDB(withName dbName: String, noDBIndexes: [String]?) -> [String]? {
         queue.sync {
-            var noDBIndexes = noDBIndexes
-            noDBIndexes?.append(NoDBConstant.id.rawValue)
+            let noDBIndexes = getCompleteNoDBModelIndexes(with: noDBIndexes)
             let typeIndex = type(of: [[String: Any]]())
-            let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
-            indexesNamesSaved[savedIndexsDBName] = typeIndex.loadDB(savedIndexsDBName)
-            var newKeysIndexs: [Int] = []
-            for (index, indexName) in (noDBIndexes ?? []).enumerated() {
-                let indexKey = dbName + ":" + indexName
-                if let _ = indexesNamesSaved[savedIndexsDBName]?.binarySearch(key: NoDBConstant.indexSaved.rawValue, value: indexName).currentIndex {
-                    indexes[indexKey] = typeIndex.loadDB(indexKey)
+            let savedIndexesDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
+            noDBIndexesSaved = typeIndex.loadDB(savedIndexesDBName) ?? []
+            var newNoDBIndexes: [String] = []
+            for indexName in noDBIndexes {
+                let indexDBName = dbName + ":" + indexName
+                if noDBIndexesSaved.binarySearch(key: NoDBConstant.indexSaved.rawValue, value: indexName).currentIndex != nil {
+                    indexes[indexDBName] = typeIndex.loadDB(indexDBName)
                 } else {
-                    performInsertToSavedIndexes(with: dbName, indexName: indexName)
-                    newKeysIndexs.append(index)
+                    performInsertToSavedIndexes(with: dbName, noDBIndexName: indexName)
+                    newNoDBIndexes.append(indexName)
                 }
             }
             let deletedDBName = IndexesNameType.deleted.getFullName(with: dbName)
             deletions[deletedDBName] = typeIndex.loadDB(deletedDBName)
-            return !newKeysIndexs.isEmpty ? newKeysIndexs : nil
+            return !newNoDBIndexes.isEmpty ? newNoDBIndexes : nil
         }
     }
     
@@ -98,7 +97,7 @@ class IndexesManager {
             updateAndSavedIndexes(with: dbName, noDBIndexes: noDBIndexes)
             let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
             let deletedIndexsDBName = IndexesNameType.deleted.getFullName(with: dbName)
-            indexesNamesSaved[savedIndexsDBName]?.saveDB(savedIndexsDBName)
+            noDBIndexesSaved.saveDB(savedIndexsDBName)
             deletions[deletedIndexsDBName]?.saveDB(deletedIndexsDBName)
         }
     }
@@ -106,14 +105,14 @@ class IndexesManager {
     func deleteDB(with dbName: String, noDBIndexes: [String]?) {
         queue.sync {
             let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
-            for indexObj in indexesNamesSaved[savedIndexsDBName] ?? [] {
+            for indexObj in noDBIndexesSaved {
                 guard let indexValue = indexObj[NoDBConstant.indexSaved.rawValue] as? String else {
                     continue
                 }
                 let keyName = dbName + ":" + indexValue
                 indexes[keyName]?.deleteDB(keyName)
             }
-            _ = indexesNamesSaved[savedIndexsDBName]?.deleteDB(savedIndexsDBName)
+            noDBIndexesSaved.deleteDB(savedIndexsDBName)
             let deletedIndexsDBName = IndexesNameType.deleted.getFullName(with: dbName)
                 deletions[deletedIndexsDBName]?.deleteDB(deletedIndexsDBName)
         }
@@ -127,33 +126,30 @@ class IndexesManager {
                 for deletions in deletions {
                 deletions.value.saveDB(deletions.key)
             }
-                for keys in indexesNamesSaved {
-                keys.value.saveDB(keys.key)
-            }
+//                for keys in noDBIndexesSaved {
+//                keys.value.saveDB(keys.key)
+//            }
         }
     }
     
     func insertToSavedIndexes(with dbName: String, indexName: String) {
         queue.async {
-            self.performInsertToSavedIndexes(with: dbName, indexName: indexName)
+            self.performInsertToSavedIndexes(with: dbName, noDBIndexName: indexName)
         }
     }
     
-    private func performInsertToSavedIndexes(with dbName: String, indexName: String){
+    private func performInsertToSavedIndexes(with dbName: String, noDBIndexName: String){
         let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
-            if indexesNamesSaved[savedIndexsDBName] == nil {
-                indexesNamesSaved[savedIndexsDBName] = []
-        }
         let key = NoDBConstant.indexSaved.rawValue
-        let newDict: [String: Any] = [key: indexName]
-            indexesNamesSaved[savedIndexsDBName]?.upsert(newDict, key: key)
+        let newDict: [String: Any] = [key: noDBIndexName]
+            noDBIndexesSaved.upsert(newDict, key: key)
     }
 
     private func updateAndSavedIndexes(with dbName: String, noDBIndexes: [String]?){
-        let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
+        let savedIndexesDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
         var noDBIndexes = noDBIndexes
         noDBIndexes?.append(NoDBConstant.id.rawValue)
-        for (index, indexObj) in (indexesNamesSaved[savedIndexsDBName] ?? []).enumerated() {
+        for (index, indexObj) in noDBIndexesSaved.enumerated() {
             guard let indexValue = indexObj[NoDBConstant.indexSaved.rawValue] as? String else {
                 continue
             }
@@ -161,10 +157,18 @@ class IndexesManager {
             if (noDBIndexes?.contains(indexValue) ?? false) {
                 indexes[keyName]?.saveDB(keyName)
             } else {
-                indexesNamesSaved[savedIndexsDBName]?.remove(at: index)
+                noDBIndexesSaved.remove(at: index)
                 indexes[keyName] = nil
             }
         }
+    }
+    
+    private func getCompleteNoDBModelIndexes(with modelNoDBIndexes: [String]?) -> [String] {
+        var completeModelNoDBIndexes = [NoDBConstant.id.rawValue]
+        for noDBIndexName in modelNoDBIndexes ?? [] {
+            completeModelNoDBIndexes.append(noDBIndexName)
+        }
+        return completeModelNoDBIndexes
     }
 
 }

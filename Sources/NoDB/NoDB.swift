@@ -27,8 +27,8 @@ open class NoDB<T: DBModel> {
         queue.async { [weak self] in
             guard let self = self else { return }
             self.objects = [T].loadDB(self.name) ?? []
-            guard let newKeysIndexs = self.indexesManager.loadDB(withName: self.name, noDBIndexes: T.noDBIndexes) else { return }
-            self.loadNewIndexes(with: newKeysIndexs)
+            guard let newNoDBIndexs = self.indexesManager.loadDB(withName: self.name, noDBIndexes: T.noDBIndexes) else { return }
+            self.loadNewIndexes(with: newNoDBIndexs)
         }
     }
     
@@ -101,10 +101,10 @@ open class NoDB<T: DBModel> {
     }
     
     
-    private func loadNewIndexes(with positions: [Int]) {
+    private func loadNewIndexes(with newNoDBIndexes: [String]) {
         guard let validObjs = self.objects.getAllValid(withDBName: self.name, indexesManager: indexesManager) else { return }
         for obj in validObjs {
-            obj.updateIndexes(forIndexsAt: positions, withDBName: self.name, indexesManager: indexesManager)
+            obj.updateIndexes(newNoDBIndexes: newNoDBIndexes, withDBName: self.name, indexesManager: indexesManager)
         }
     }
 }

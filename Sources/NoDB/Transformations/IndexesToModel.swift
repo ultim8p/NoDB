@@ -11,7 +11,8 @@ extension Array where Element: DBModel {
     func models(fromIndexes indexes: [[String: Any]]?) -> [Element]? {
         var results: [Element] = []
         for result in indexes ?? [] {
-            guard let indexValue = result.indexValue() else { continue }
+            guard let indexValue = result.indexValue(),
+                  self.rangeContains(index: indexValue) else { continue }
             results.append(self[indexValue])
         }
         return results.count > 0 ? results : nil
