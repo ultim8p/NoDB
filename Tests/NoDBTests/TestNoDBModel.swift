@@ -15,8 +15,9 @@ struct TestNoDBModel: DBModel {
     var intValue: Int?
 //    var randonDouble: Double?
 //    var randomFloat: Float?
+    var boolValue: Bool?
     var text: String?
     
-    static var noDBIndexes: [String]? = ["intValue", "dateValue", "text"]
+    static var noDBIndexes: [String]? = ["intValue", "dateValue", "text", "boolValue"]
     
 }

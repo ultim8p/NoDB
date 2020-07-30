@@ -13,7 +13,7 @@ class IndexesManager {
 
     private var noDBIndexesSaved: [[String: Any]] = []
     private var indexes: [String: [[String: Any]]] = [:]
-    private var deletions: [String: [[String: Any]]] = [:]
+    private var deletions: [[String: Any]] = []
     
     
     func get(withType type: IndexesType, indexDBName: String) -> [[String: Any]]? {
@@ -22,7 +22,7 @@ class IndexesManager {
             case .indexes:
                 return indexes[indexDBName]
             case .deletions:
-                return deletions[indexDBName]
+                return deletions
             }
         }
     }
@@ -42,10 +42,7 @@ class IndexesManager {
                 }
                 self.indexes[indexDBName]?.insert(indexDict, key: sortKey)
             case .deletions:
-                if deletions[indexDBName] == nil {
-                    deletions[indexDBName] = []
-                }
-                deletions[indexDBName]?.insert(indexDict, key: sortKey)
+                deletions.insert(indexDict, key: sortKey)
             }
         }
     }
@@ -65,7 +62,7 @@ class IndexesManager {
             case .indexes:
                 indexes[indexDBName]?.delete(indexDict, key: sortKey)
             case .deletions:
-                deletions[indexDBName]?.delete(indexDict, key: sortKey)
+                deletions.delete(indexDict, key: sortKey)
             }
         }
     }
@@ -87,7 +84,7 @@ class IndexesManager {
                 }
             }
             let deletedDBName = IndexesNameType.deleted.getFullName(with: dbName)
-            deletions[deletedDBName] = typeIndex.loadDB(deletedDBName)
+            deletions = typeIndex.loadDB(deletedDBName) ?? []
             return !newNoDBIndexes.isEmpty ? newNoDBIndexes : nil
         }
     }
@@ -98,7 +95,7 @@ class IndexesManager {
             let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
             let deletedIndexsDBName = IndexesNameType.deleted.getFullName(with: dbName)
             noDBIndexesSaved.saveDB(savedIndexsDBName)
-            deletions[deletedIndexsDBName]?.saveDB(deletedIndexsDBName)
+            deletions.saveDB(deletedIndexsDBName)
         }
     }
     
@@ -113,22 +110,8 @@ class IndexesManager {
                 indexes[keyName]?.deleteDB(keyName)
             }
             noDBIndexesSaved.deleteDB(savedIndexsDBName)
-            let deletedIndexsDBName = IndexesNameType.deleted.getFullName(with: dbName)
-                deletions[deletedIndexsDBName]?.deleteDB(deletedIndexsDBName)
-        }
-    }
-
-    func saveDB() {
-        queue.sync {
-            for indexes in indexes {
-                indexes.value.saveDB(indexes.key)
-            }
-                for deletions in deletions {
-                deletions.value.saveDB(deletions.key)
-            }
-//                for keys in noDBIndexesSaved {
-//                keys.value.saveDB(keys.key)
-//            }
+            let deletedDBName = IndexesNameType.deleted.getFullName(with: dbName)
+                deletions.deleteDB(deletedDBName)
         }
     }
     
@@ -139,26 +122,24 @@ class IndexesManager {
     }
     
     private func performInsertToSavedIndexes(with dbName: String, noDBIndexName: String){
-        let savedIndexsDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
         let key = NoDBConstant.indexSaved.rawValue
         let newDict: [String: Any] = [key: noDBIndexName]
             noDBIndexesSaved.upsert(newDict, key: key)
     }
 
     private func updateAndSavedIndexes(with dbName: String, noDBIndexes: [String]?){
-        let savedIndexesDBName = IndexesNameType.savedIndexes.getFullName(with: dbName)
-        var noDBIndexes = noDBIndexes
-        noDBIndexes?.append(NoDBConstant.id.rawValue)
-        for (index, indexObj) in noDBIndexesSaved.enumerated() {
-            guard let indexValue = indexObj[NoDBConstant.indexSaved.rawValue] as? String else {
+        let noDBIndexes = getCompleteNoDBModelIndexes(with: noDBIndexes)
+        for noDBIndex in noDBIndexesSaved {
+            guard let noDBIndexName = noDBIndex[NoDBConstant.indexSaved.rawValue] as? String else {
                 continue
             }
-            let keyName = dbName + ":" + indexValue
-            if (noDBIndexes?.contains(indexValue) ?? false) {
-                indexes[keyName]?.saveDB(keyName)
+            let indexDBName = dbName + ":" + noDBIndexName
+            if noDBIndexes.contains(noDBIndexName) {
+                indexes[indexDBName]?.saveDB(indexDBName)
             } else {
-                noDBIndexesSaved.remove(at: index)
-                indexes[keyName] = nil
+                let key = NoDBConstant.indexSaved.rawValue
+                noDBIndexesSaved.delete([key: noDBIndexName], key: key)
+                indexes[indexDBName] = nil
             }
         }
     }

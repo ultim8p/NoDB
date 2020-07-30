@@ -25,8 +25,9 @@ final class NoDBTests: XCTestCase {
             let randomInt = i
             let time = Double(10 * i)
             let text = "Hi \(randomInt)"
+            let boolValue = i < 25 ? true : false
             let objDate = date.addingTimeInterval(time)
-            objs.append(TestNoDBModel(noDBIndex: nil, _id: _id, dateValue: objDate, intValue: randomInt, text: text))
+            objs.append(TestNoDBModel(noDBIndex: nil, _id: _id, dateValue: objDate, intValue: randomInt, boolValue: boolValue, text: text))
         }
         return objs
     }
@@ -336,8 +337,8 @@ final class NoDBTests: XCTestCase {
             promises[0].fulfill()
         }
         wait(for: promises, timeout: 10)
-        XCTAssertTrue(conditionAcomplishedByResults)
         XCTAssertEqual(objsFound?.count, 1500)
+        XCTAssertTrue(conditionAcomplishedByResults)
     }
     
     func testDeleteWithValue(){
@@ -363,9 +364,13 @@ final class NoDBTests: XCTestCase {
             promises[1].fulfill()
         }
         wait(for: promises, timeout: 10)
-        XCTAssertTrue(conditionAcomplishedByResults)
         XCTAssertEqual(deletedObjs?.count, 1500)
         XCTAssertEqual(countObjsSaved, 1500)
+        XCTAssertTrue(conditionAcomplishedByResults)
+    }
+    
+    func testBoolQuery(){
+        
     }
     
     func testDateInclusiveInequalityQuery(){
@@ -386,8 +391,29 @@ final class NoDBTests: XCTestCase {
             }
         }
         wait(for: promises, timeout: 10)
-        XCTAssertTrue(conditionAcomplishedByResults)
         XCTAssertEqual(objsFoundWithLessthanDate?.count, 1500)
+        XCTAssertTrue(conditionAcomplishedByResults)
+    }
+    
+    func testBoolExclusiveQuery() {
+        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        testNoDB.save(obj: getOrderedElements())
+        let promises = [expectation(description: "Find objects with Bool value completion")]
+        var objsFoundWithEqualBoolValue: [TestNoDBModel]?
+        var conditionAcomplishedByResults = true
+        testNoDB.find("boolValue" ==  true) { (objs) in
+            objsFoundWithEqualBoolValue = objs
+            for obj in objs ?? [] {
+                guard let boolValue = obj.boolValue, boolValue == true else {
+                    conditionAcomplishedByResults = false
+                    break
+                }
+            }
+            promises[0].fulfill()
+        }
+        wait(for: promises, timeout: 10)
+        XCTAssertEqual(objsFoundWithEqualBoolValue?.count, 25)
+        XCTAssertTrue(conditionAcomplishedByResults)
     }
 //    
 //    func testModifyValues(){
