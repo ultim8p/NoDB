@@ -19,4 +19,9 @@ public extension Array where Element: DBModel {
             return models(fromIndexes: rangedIndexes)
         }
     }
+    
+    func getElementResult(for queryIndexes: [[String: Any]]) -> Element? {
+        guard let firstIndex = queryIndexes.first else { return nil }
+        return model(fromIndex: firstIndex)
+    }
 }

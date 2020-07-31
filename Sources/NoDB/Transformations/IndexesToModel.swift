@@ -17,4 +17,11 @@ extension Array where Element: DBModel {
         }
         return results.count > 0 ? results : nil
     }
+    
+    func model(fromIndex index: [String: Any]?) -> Element? {
+        guard let indexValue = index?.indexValue(),
+              self.rangeContains(index: indexValue) else { return nil }
+        let result = self[indexValue]
+        return result
+    }
 }

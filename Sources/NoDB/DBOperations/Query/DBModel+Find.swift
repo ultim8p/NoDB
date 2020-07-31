@@ -21,4 +21,9 @@ extension Array where Element: DBModel {
         guard let queryIndexes = findIndexes(for: query, dbName: dbName, idKey: idKey, indexesManager: indexesManager) else { return nil }
         return getElemetResults(for: queryIndexes, sort: sort, skip: skip, limit: limit)
     }
+    
+    func findFirst(_ query: Query?, dbName: String, idKey: String, indexesManager: IndexesManager) -> Element? {
+        guard let queryIndexes = findIndexes(for: query, dbName: dbName, idKey: idKey, indexesManager: indexesManager) else { return nil }
+        return getElementResult(for: queryIndexes)
+    }
 }

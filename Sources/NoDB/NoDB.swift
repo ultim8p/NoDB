@@ -34,7 +34,7 @@ open class NoDB<T: DBModel> {
     
     // MARK: Query
     
-    public func find(_ query: Query?, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, completion: ModelsCompletion?) {
+    public func find(_ query: Query? = nil, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, completion: ModelsCompletion?) {
         queue.async { [weak self] in
             guard let self = self else { return }
             let results = self.objects.find(query, dbName: self.name, sort: sort, skip: skip, limit: limit, idKey: self.idKey, indexesManager: self.indexesManager)
@@ -44,9 +44,27 @@ open class NoDB<T: DBModel> {
         }
     }
     
+    public func findFirst(_ query: Query? = nil, completion: ModelCompletion?) {
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            let result = self.objects.findFirst(query, dbName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
+            DispatchQueue.main.async {
+                completion?(result)
+            }
+        }
+    }
+    
+    public func findFirstSync(_ query: Query? = nil) -> T? {
+        queue.sync { [weak self] in
+            guard let self = self else { return  nil }
+            let result = self.objects.findFirst(query, dbName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
+            return result
+        }
+    }
+    
     // MARK: Query
     
-    public func findSync(_ query: Query?, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil)  -> [T]? {
+    public func findSync(_ query: Query? = nil, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil)  -> [T]? {
         queue.sync {
             let results = self.objects.find(query, dbName: self.name, sort: sort, skip: skip, limit: limit, idKey: self.idKey, indexesManager: self.indexesManager)
             return results

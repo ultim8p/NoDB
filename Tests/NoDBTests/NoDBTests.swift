@@ -45,7 +45,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testAddObjects(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestA", idKey: "_id")
        
         var objsSaved: [TestNoDBModel] = []
         let promises = [expectation(description: "Save completion invoked")]
@@ -62,7 +62,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testAddOneAndDeleteObject(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestB", idKey: "_id")
         let promises = [expectation(description: "Save completion invoked"),
                         expectation(description: "Find completion invoked")]
         var deletedObj: TestNoDBModel?
@@ -106,7 +106,7 @@ final class NoDBTests: XCTestCase {
     
     
     func testIntExclusiveQuery(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestC", idKey: "_id")
         let promise = expectation(description: "Find completion invoked")
         testNoDB.save(obj: getOrderedElements())
         var conditionAcomplishedByResults = true
@@ -127,7 +127,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testIntInclusiveQuery(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestD", idKey: "_id")
         testNoDB.save(obj: getOrderedElements())
         let promise = expectation(description: "Find completion invoked")
         var conditionAcomplishedByResults = true
@@ -148,7 +148,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testUpdateExistingObjects(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestE", idKey: "_id")
         testNoDB.save(obj: getOrderedElements())
         let promises = [expectation(description: "Get elementes to change completion"),
                         expectation(description: "save objects with updated values completion")]
@@ -181,7 +181,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testFindSpecificId(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestF", idKey: "_id")
         testNoDB.save(obj: getOrderedElements())
         let promise = expectation(description: "Find element completion")
         var objsFound: [TestNoDBModel]?
@@ -196,7 +196,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testFindWithSpecificValue(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestG", idKey: "_id")
         testNoDB.save(obj: getOrderedElements())
         let promise = expectation(description: "Find element completion")
         var conditionAcomplishedByResults = true
@@ -217,7 +217,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testDateExclusiveQuery(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestH", idKey: "_id")
         testNoDB.save(obj: getOrderedElements())
         let promises = [expectation(description: "Find all objs completion invoked"),
                        expectation(description: "Find objects with date completion invoked")]
@@ -247,7 +247,7 @@ final class NoDBTests: XCTestCase {
     }
 
     func testDateInclusiveQuery(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestI", idKey: "_id")
         testNoDB.save(obj: getOrderedElements())
         let promises = [expectation(description: "Find all objs completion"),
                        expectation(description: "Find objects with date completion")]
@@ -277,7 +277,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testIntInclusiveQueryWhenTheresDuplicated() {
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestJ", idKey: "_id")
         testNoDB.save(obj: getElementsWithValuesDuplicated())
         let promises = [expectation(description: "Find objects completion")]
         var objsFound: [TestNoDBModel]?
@@ -299,7 +299,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testIntExclusiveQueryWhenTheresDuplicated() {
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestK", idKey: "_id")
         testNoDB.save(obj: getElementsWithValuesDuplicated())
         let promises = [expectation(description: "Find objects completion")]
         var objsFound: [TestNoDBModel]?
@@ -321,7 +321,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testStringInclusiveQueryWhenTheresDuplicated(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestL", idKey: "_id")
         testNoDB.save(obj: getElementsWithValuesDuplicated())
         let promises = [expectation(description: "Find objects completion")]
         var objsFound: [TestNoDBModel]?
@@ -342,7 +342,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testDeleteWithValue(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestM", idKey: "_id")
         testNoDB.save(obj: getElementsWithValuesDuplicated())
         let promises = [expectation(description: "Delete objects completion"),
                         expectation(description: "Find remaining objs completion")]
@@ -374,7 +374,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testDateInclusiveInequalityQuery(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestN", idKey: "_id")
         testNoDB.save(obj: getElementsWithValuesDuplicated())
         let promises = [expectation(description: "Find objects with date completion")]
         var objsFoundWithLessthanDate: [TestNoDBModel]?
@@ -396,7 +396,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testBoolExclusiveQuery() {
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestO", idKey: "_id")
         testNoDB.save(obj: getOrderedElements())
         let promises = [expectation(description: "Find objects with Bool value completion")]
         var objsFoundWithEqualBoolValue: [TestNoDBModel]?
@@ -417,7 +417,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testSyncQuery(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestP", idKey: "_id")
         testNoDB.save(obj: getOrderedElements())
         var conditionAcomplishedBySyncResults = true
         
@@ -455,7 +455,7 @@ final class NoDBTests: XCTestCase {
     }
     
     func testModifyValues(){
-        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestQ", idKey: "_id")
         testNoDB.save(obj: getOrderedElements())
         let promises = [expectation(description: "Find obj modified")]
         
@@ -476,7 +476,43 @@ final class NoDBTests: XCTestCase {
         wait(for: promises, timeout: 10)
         XCTAssertEqual(oldIntValue, 18)
         XCTAssertEqual(newIntValue, initialNewIntValue)
+    }
+    
+    func testFindFirstWithEquality(){
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestR", idKey: "_id")
+        testNoDB.save(obj: getOrderedElements())
+        let promises = [expectation(description: "Find nil query completion"),
+                        expectation(description: "Find id query completion")]
+        var nilQueryObjFound: TestNoDBModel?
+        testNoDB.findFirst() { obj in
+            nilQueryObjFound = obj
+            promises[0].fulfill()
+        }
+        var idQueryObjFound: TestNoDBModel?
+        testNoDB.findFirst("_id" == "TestNoDB48") { obj in
+            idQueryObjFound = obj
+            promises[1].fulfill()
+        }
+        wait(for: promises, timeout: 10)
+        XCTAssertEqual(nilQueryObjFound?._id, "TestNoDB0")
+        XCTAssertEqual(idQueryObjFound?._id, "TestNoDB48")
+    }
+    
+    func testFindFirstSyncWithEquality(){
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestS", idKey: "_id")
+        testNoDB.save(obj: getRandomElements())
 
+        let nilQueryObjFound = testNoDB.findFirstSync()
+        let idQueryObjFound = testNoDB.findFirstSync("_id" == "TestNoDB15")
+        let intValueGreaterThanObjFound = testNoDB.findFirstSync("_id" > "TestNoDB14")
+        
+        testNoDB.deleteDB()
+        let objFoundAfterDeletion = testNoDB.findFirstSync()
+        
+        XCTAssertEqual(nilQueryObjFound?._id, "TestNoDB0")
+        XCTAssertEqual(idQueryObjFound?._id, "TestNoDB15")
+        XCTAssertEqual(intValueGreaterThanObjFound?._id, "TestNoDB15")
+        XCTAssertNil(objFoundAfterDeletion)
     }
 
     static var allTests = [
