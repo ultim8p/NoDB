@@ -415,18 +415,69 @@ final class NoDBTests: XCTestCase {
         XCTAssertEqual(objsFoundWithEqualBoolValue?.count, 25)
         XCTAssertTrue(conditionAcomplishedByResults)
     }
-//    
-//    func testModifyValues(){
-//        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
-//        testNoDB.save(obj: getOrderedElements())
-//        let promises = [expectation(description: "Object mofified completion")]
-//        var initialNewIntValue: Int? = 6
-//        var existingObjToModify = TestNoDBModel(noDBIndex: nil, _id: "TestNoDB1890", intValue: initialNewIntValue)
-//        testNoDB.save(obj: existingObjToModify) {
-//            
-//        }
-//        testNoDB.save(obj: )
-//    }
+    
+    func testSyncQuery(){
+        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        testNoDB.save(obj: getOrderedElements())
+        var conditionAcomplishedBySyncResults = true
+        
+        let syncSearchResults = testNoDB.findSync("intValue" < 25)
+        
+        for obj in syncSearchResults ?? [] {
+            guard let intValue = obj.intValue, intValue < 25 else {
+                conditionAcomplishedBySyncResults = false
+                break
+            }
+        }
+        
+        let promises = [expectation(description: "Async Find objects completion")]
+        var objsFound: [TestNoDBModel]?
+        var conditionAcomplishedByAsyncResults = true
+        
+        testNoDB.find("intValue" < 25) { (objs) in
+            objsFound = objs
+            for obj in objsFound ?? [] {
+                guard let intValue = obj.intValue, intValue < 25 else {
+                    conditionAcomplishedByAsyncResults = false
+                    break
+                }
+            }
+            promises[0].fulfill()
+        }
+        
+        XCTAssertEqual(syncSearchResults?.count, 25)
+        XCTAssertTrue(conditionAcomplishedBySyncResults)
+        
+        wait(for: promises, timeout: 10)
+        XCTAssertEqual(objsFound?.count, 25)
+        XCTAssertTrue(conditionAcomplishedByAsyncResults)
+
+    }
+    
+    func testModifyValues(){
+        let testNoDB = NoDB<TestNoDBModel>(name: "Test", idKey: "_id")
+        testNoDB.save(obj: getOrderedElements())
+        let promises = [expectation(description: "Find obj modified")]
+        
+        let initialNewIntValue = 6
+        var newIntValue: Int?
+        var oldIntValue: Int?
+        let existingObjToModify = TestNoDBModel(noDBIndex: nil, _id: "TestNoDB18", intValue: initialNewIntValue)
+        
+        testNoDB.find("_id" == "TestNoDB18") { (objs) in
+            oldIntValue =  objs?.first?.intValue
+        }
+        testNoDB.save(obj: existingObjToModify)
+        
+        testNoDB.find("_id" == "TestNoDB18") { (objs) in
+            newIntValue =  objs?.first?.intValue
+            promises[0].fulfill()
+        }
+        wait(for: promises, timeout: 10)
+        XCTAssertEqual(oldIntValue, 18)
+        XCTAssertEqual(newIntValue, initialNewIntValue)
+
+    }
 
     static var allTests = [
         ("testAddObjects", testAddObjects),

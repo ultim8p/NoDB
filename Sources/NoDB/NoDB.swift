@@ -44,6 +44,15 @@ open class NoDB<T: DBModel> {
         }
     }
     
+    // MARK: Query
+    
+    public func findSync(_ query: Query?, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil)  -> [T]? {
+        queue.sync {
+            let results = self.objects.find(query, dbName: self.name, sort: sort, skip: skip, limit: limit, idKey: self.idKey, indexesManager: self.indexesManager)
+            return results
+        }
+    }
+    
     // MARK: Delete
     
     public func delete(_ query: Query, completion: ModelsCompletion? = nil) {
