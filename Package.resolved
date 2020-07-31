@@ -5,27 +5,27 @@
         "package": "BinarySearch",
         "repositoryURL": "https://github.com/ultim8p/BinarySearch",
         "state": {
-          "branch": "master",
-          "revision": "0e6c3840d1edf5795bae2e0461718b61aa01b213",
-          "version": null
+          "branch": null,
+          "revision": "cce9b7b33acbbdcc1b6d08875c1b188db74f9767",
+          "version": "0.0.3"
         }
       },
       {
         "package": "CodableUtils",
         "repositoryURL": "https://github.com/ultim8p/CodableUtils",
         "state": {
-          "branch": "master",
-          "revision": "66e66509aa907df15a788ccfbf832785b6a6beb0",
-          "version": null
+          "branch": null,
+          "revision": "a70fb06e96ad575f918fc3137b8db81094bba37f",
+          "version": "0.0.2"
         }
       },
       {
         "package": "Mergeable",
         "repositoryURL": "https://github.com/ultim8p/Mergeable",
         "state": {
-          "branch": "master",
+          "branch": null,
           "revision": "81ea94d1a6a04f366608b2416a727c5f11d20c28",
-          "version": null
+          "version": "0.0.2"
         }
       }
     ]
