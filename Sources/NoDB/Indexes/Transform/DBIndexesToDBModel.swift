@@ -8,7 +8,7 @@
 import Foundation
 
 public extension Array where Element: DBModel {
-    func getElemetResults(for queryIndexes: [[String: Any]], sort: Sort?, skip: Int? = nil, limit: Int? = nil) -> [Element]? {
+    func getElementResults(for queryIndexes: [[String: Any]], sort: Sort?, skip: Int? = nil, limit: Int? = nil) -> [Element]? {
         // If sort parameter exists, get the list of elements first to sort them before performing the skip and limit operations.
         if let sort = sort {
             var objs = models(fromIndexes: queryIndexes)
@@ -20,8 +20,7 @@ public extension Array where Element: DBModel {
         }
     }
     
-    func getElementResult(for queryIndexes: [[String: Any]]) -> Element? {
-        guard let firstIndex = queryIndexes.first else { return nil }
-        return model(fromIndex: firstIndex)
+    func getElementResult(for queryIndex: [String: Any]?) -> Element? {
+        return model(fromIndex: queryIndex)
     }
 }

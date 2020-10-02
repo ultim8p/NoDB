@@ -9,7 +9,6 @@
 import Foundation
 import BinarySearch
 
-
 extension DBModel {
     static var dbName: String {
         return String(describing: self).lowercased()
