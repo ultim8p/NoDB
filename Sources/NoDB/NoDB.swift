@@ -85,18 +85,18 @@ open class NoDB<T: DBModel> {
     
     // MARK: Save
     
-    public func save(obj: T, completion: ModelCompletion? = nil) {
-        save(obj: [obj]) { objs in
+    public func save(obj: T, replace: Bool = false, completion: ModelCompletion? = nil) {
+        save(obj: [obj], replace: replace) { objs in
             DispatchQueue.main.async {
                 completion?(objs?.first)
             }
         }
     }
     
-    public func save(obj: [T], completion: ModelsCompletion? = nil) {
+    public func save(obj: [T], replace: Bool = false, completion: ModelsCompletion? = nil) {
         queue.async { [weak self] in
             guard let self = self else { return }
-            let objsSaved = self.objects.save(obj, withDBName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
+            let objsSaved = self.objects.save(obj, withDBName: self.name, idKey: self.idKey, indexesManager: self.indexesManager, replace: replace)
             DispatchQueue.main.async {
                 completion?(objsSaved)
             }

@@ -514,6 +514,19 @@ final class NoDBTests: XCTestCase {
         XCTAssertEqual(intValueGreaterThanObjFound?._id, "TestNoDB15")
         XCTAssertNil(objFoundAfterDeletion)
     }
+    
+    func testReplace() {
+        let testNoDB = NoDB<TestNoDBModel>(name: "TestT", idKey: "_id")
+        testNoDB.save(obj: getOrderedElements())
+        let idQueryObjFound = testNoDB.findFirstSync("_id" == "TestNoDB15")
+        XCTAssertNotNil(idQueryObjFound?.boolValue)
+        XCTAssertNotNil(idQueryObjFound?.dateValue)
+        XCTAssertTrue(idQueryObjFound?.boolValue ?? false)
+        testNoDB.save(obj: TestNoDBModel(noDBIndex: nil, _id: "TestNoDB15", dateValue: nil, intValue: 25, boolValue: nil, text: "Hi 25"), replace: true)
+        let objFoundAfterReplacement = testNoDB.findFirstSync("_id" == "TestNoDB15")
+        XCTAssertNil(objFoundAfterReplacement?.boolValue)
+        XCTAssertNil(objFoundAfterReplacement?.dateValue)
+    }
 
     static var allTests = [
         ("testAddObjects", testAddObjects),

@@ -26,6 +26,11 @@ extension DBModel {
 //        indexes?.upsertIndexes(for: self, withDBName: dbName)
 //    }
     
+    func replaceIndexes(with newObj: Self, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
+        let indexes = type(of: self).noDBIndexes
+        indexes?.replaceIndexes(for: self, with: newObj, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
+    }
+    
     func updateIndexes(with newObj: Self, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
         let indexes = type(of: self).noDBIndexes
         indexes?.updateIndexes(for: self, newObj: newObj, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
@@ -138,21 +143,21 @@ extension Array where Element: DBModel {
         guard let indexesResults = indexes.searchRange(with: key, lowerValue: lowerValue, lowerOpt: lowerOpt, upperValue: upperValue, upperOpt: upperOpt, limit: limit, bound: bound) else { return nil}
         return models(fromIndexes: indexesResults)
     }
-    
+
     func searchRange(with key: String, value: Any, operatr: LowerOperator, withDBName dbName: String, indexesManager: IndexesManager) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = indexesManager.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
         guard let indexesResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
         return models(fromIndexes: indexesResults)
     }
-    
+
     func searchRange(with key: String, value: Any, operatr: UpperOperator, withDBName dbName: String, indexesManager: IndexesManager) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = indexesManager.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
         guard let indexesResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
         return models(fromIndexes: indexesResults)
     }
-    
+
     func searchRange(with key: String, value: Any, operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, withDBName dbName: String, indexesManager: IndexesManager) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = indexesManager.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
