@@ -37,7 +37,9 @@ open class NoDB<T: DBModel> {
     public func find(_ query: Query? = nil, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, completion: ModelsCompletion?) {
         queue.async { [weak self] in
             guard let self = self else {
-                completion?(nil)
+                DispatchQueue.main.async {
+                    completion?(nil)
+                }
                 return
             }
             let results = self.objects.find(query, dbName: self.name, sort: sort, skip: skip, limit: limit, idKey: self.idKey, indexesManager: self.indexesManager)
@@ -50,7 +52,9 @@ open class NoDB<T: DBModel> {
     public func findFirst(_ query: Query? = nil, completion: ModelCompletion?) {
         queue.async { [weak self] in
             guard let self = self else {
-                completion?(nil)
+                DispatchQueue.main.async {
+                    completion?(nil)
+                }
                 return
             }
             let result = self.objects.findFirst(query, dbName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
@@ -82,7 +86,9 @@ open class NoDB<T: DBModel> {
     public func delete(_ query: Query, completion: ModelsCompletion? = nil) {
         queue.async { [weak self] in
             guard let self = self else {
-                completion?(nil)
+                DispatchQueue.main.async {
+                    completion?(nil)
+                }
                 return
             }
             let results = self.objects.delete(query, dbName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
@@ -105,7 +111,9 @@ open class NoDB<T: DBModel> {
     public func save(obj: [T], replace: Bool = false, completion: ModelsCompletion? = nil) {
         queue.async { [weak self] in
             guard let self = self else {
-                completion?(nil)
+                DispatchQueue.main.async {
+                    completion?(nil)
+                }
                 return
             }
             let objsSaved = self.objects.save(obj, withDBName: self.name, idKey: self.idKey, indexesManager: self.indexesManager, replace: replace)
@@ -120,7 +128,9 @@ open class NoDB<T: DBModel> {
     public func saveDB(_ handler: VoidCompletion? = nil){
         queue.async { [weak self] in
             guard let self = self else {
-                handler?()
+                DispatchQueue.main.async {
+                    handler?()
+                }
                 return
             }
             self.objects.saveDB(self.name)
@@ -134,7 +144,9 @@ open class NoDB<T: DBModel> {
     public func deleteDB(_ handler: VoidCompletion? = nil){
         queue.async { [weak self] in
             guard let self = self else {
-                handler?()
+                DispatchQueue.main.async {
+                    handler?()
+                }
                 return
             }
             self.objects.deleteDB(self.name)
