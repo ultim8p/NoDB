@@ -21,7 +21,7 @@ extension Array where Element == [String: Any] {
         if let itemIndex = indexQ.currentIndex {
             self[itemIndex] = dict
             return (itemIndex, nil)
-        } else if let insertIndex = indexQ.insertInIndex {
+        } else if let insertIndex = indexQ.insertInIndex, self.canInsert(at: insertIndex) {
             self.insert(dict, at: insertIndex)
             return (nil, insertIndex)
         }

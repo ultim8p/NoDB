@@ -36,7 +36,12 @@ open class NoDB<T: DBModel> {
     
     public func find(_ query: Query? = nil, sort: Sort? = nil, skip: Int? = nil, limit: Int? = nil, completion: ModelsCompletion?) {
         queue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self = self else {
+                DispatchQueue.main.async {
+                    completion?(nil)
+                }
+                return
+            }
             let results = self.objects.find(query, dbName: self.name, sort: sort, skip: skip, limit: limit, idKey: self.idKey, indexesManager: self.indexesManager)
             DispatchQueue.main.async {
                 completion?(results)
@@ -46,7 +51,12 @@ open class NoDB<T: DBModel> {
     
     public func findFirst(_ query: Query? = nil, completion: ModelCompletion?) {
         queue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self = self else {
+                DispatchQueue.main.async {
+                    completion?(nil)
+                }
+                return
+            }
             let result = self.objects.findFirst(query, dbName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
             DispatchQueue.main.async {
                 completion?(result)
@@ -75,7 +85,12 @@ open class NoDB<T: DBModel> {
     
     public func delete(_ query: Query, completion: ModelsCompletion? = nil) {
         queue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self = self else {
+                DispatchQueue.main.async {
+                    completion?(nil)
+                }
+                return
+            }
             let results = self.objects.delete(query, dbName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
             DispatchQueue.main.async {
                 completion?(results)
@@ -85,18 +100,23 @@ open class NoDB<T: DBModel> {
     
     // MARK: Save
     
-    public func save(obj: T, completion: ModelCompletion? = nil) {
-        save(obj: [obj]) { objs in
+    public func save(obj: T, replace: Bool = false, completion: ModelCompletion? = nil) {
+        save(obj: [obj], replace: replace) { objs in
             DispatchQueue.main.async {
                 completion?(objs?.first)
             }
         }
     }
     
-    public func save(obj: [T], completion: ModelsCompletion? = nil) {
+    public func save(obj: [T], replace: Bool = false, completion: ModelsCompletion? = nil) {
         queue.async { [weak self] in
-            guard let self = self else { return }
-            let objsSaved = self.objects.save(obj, withDBName: self.name, idKey: self.idKey, indexesManager: self.indexesManager)
+            guard let self = self else {
+                DispatchQueue.main.async {
+                    completion?(nil)
+                }
+                return
+            }
+            let objsSaved = self.objects.save(obj, withDBName: self.name, idKey: self.idKey, indexesManager: self.indexesManager, replace: replace)
             DispatchQueue.main.async {
                 completion?(objsSaved)
             }
@@ -107,7 +127,12 @@ open class NoDB<T: DBModel> {
     
     public func saveDB(_ handler: VoidCompletion? = nil){
         queue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self = self else {
+                DispatchQueue.main.async {
+                    handler?()
+                }
+                return
+            }
             self.objects.saveDB(self.name)
             self.indexesManager.saveDB(with: self.name, noDBIndexes: T.noDBIndexes)
             DispatchQueue.main.async {
@@ -118,7 +143,12 @@ open class NoDB<T: DBModel> {
     
     public func deleteDB(_ handler: VoidCompletion? = nil){
         queue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self = self else {
+                DispatchQueue.main.async {
+                    handler?()
+                }
+                return
+            }
             self.objects.deleteDB(self.name)
             self.indexesManager.deleteDB(with: self.name, noDBIndexes: T.noDBIndexes)
             DispatchQueue.main.async {

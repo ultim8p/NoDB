@@ -35,13 +35,12 @@ extension Array where Element == String {
         indexesManager.delete(indexDBName: dbName + ":" + noDBIdKey,
                               sortKey: noDBIdKey,
                               indexDict: idIndexDict)
-        
         // Save a deleted object in the deletions indexes database by the object's id.
-        let deletionReferenceDict: [String: Any] = [NoDBConstant.id.rawValue: objId,
+        let deletionReferenceDict: [String: Any] = [noDBIdKey: objId,
                                              NoDBConstant.index.rawValue: objIndex]
         indexesManager.insert(indexType: .deletions,
                               indexDBName: IndexesNameType.deleted.getFullName(with: dbName),
-                              sortKey: idKey,
+                              sortKey: noDBIdKey,
                               indexDict: deletionReferenceDict)
     }
 }

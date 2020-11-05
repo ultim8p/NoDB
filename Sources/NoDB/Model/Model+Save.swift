@@ -25,6 +25,11 @@ extension DBModel {
 //        indexes?.upsertIndexes(for: self, withDBName: dbName)
 //    }
     
+    func replaceIndexes(with newObj: Self, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
+        let indexes = type(of: self).noDBIndexes
+        indexes?.replaceIndexes(for: self, with: newObj, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
+    }
+    
     func updateIndexes(with newObj: Self, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
         let indexes = type(of: self).noDBIndexes
         indexes?.updateIndexes(for: self, newObj: newObj, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
@@ -116,17 +121,17 @@ extension Array where Element: DBModel {
     /// If the deletions database contains at least one object, the new object will occupy the postion of the first item in deleted indexes database.
     /// - Parameters:
     ///     - dbName: Name of the database of the mode.
-    func getIndexForInsertion(withDBName dbName: String, indexesManager: IndexesManager) -> Int {
+    func getIndexForInsertion(withDBName dbName: String, indexesManager: IndexesManager) -> (index: Int, shouldReplace: Bool) {
         let indexDBName = IndexesNameType.deleted.getFullName(with: dbName)
         guard let deletions = indexesManager.get(withType: .deletions,
                                                         indexDBName: indexDBName),
             let deletedIndexDict = deletions.first,
-            let index = deletedIndexDict[NoDBConstant.index.rawValue] as? Int else { return self.count }
+            let index = deletedIndexDict[NoDBConstant.index.rawValue] as? Int else { return (self.count, false) }
         indexesManager.delete(indexType: .deletions,
                                      indexDBName: indexDBName,
                                      sortKey: NoDBConstant.id.rawValue,
                                      indexDict: deletedIndexDict)
-        return index
+        return (index, true)
     }
     
     
@@ -137,21 +142,21 @@ extension Array where Element: DBModel {
         guard let indexesResults = indexes.searchRange(with: key, lowerValue: lowerValue, lowerOpt: lowerOpt, upperValue: upperValue, upperOpt: upperOpt, limit: limit, bound: bound) else { return nil}
         return models(fromIndexes: indexesResults)
     }
-    
+
     func searchRange(with key: String, value: Any, operatr: LowerOperator, withDBName dbName: String, indexesManager: IndexesManager) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = indexesManager.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
         guard let indexesResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
         return models(fromIndexes: indexesResults)
     }
-    
+
     func searchRange(with key: String, value: Any, operatr: UpperOperator, withDBName dbName: String, indexesManager: IndexesManager) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = indexesManager.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
         guard let indexesResults = indexes.searchRange(with: key, value: value, withOp: operatr) else { return nil}
         return models(fromIndexes: indexesResults)
     }
-    
+
     func searchRange(with key: String, value: Any, operatr: ExclusiveOperator, limit: Int?, skip: Int? = nil, withDBName dbName: String, indexesManager: IndexesManager) -> [Element]? {
         let indexDBName = dbName + ":" + key
         guard let indexes = indexesManager.get(withType: .indexes, indexDBName: indexDBName) else { return nil }
@@ -164,10 +169,6 @@ extension Array where Element: DBModel {
         let indexDBName = dbName + ":" + NoDBConstant.id.rawValue
         guard let indexesResults = indexesManager.get(withType: .indexes, indexDBName: indexDBName) else  { return nil }
         return models(fromIndexes: indexesResults)
-    }
-    
-    func rangeContains(index: Int) -> Bool {
-        return index >= 0 && index < self.count
     }
     
 }
