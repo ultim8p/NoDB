@@ -15,7 +15,7 @@ extension Array where Element == [String: Any] {
     mutating func insert(_ indexDict: Element, key: String) {
         guard let value = indexDict[key] else { return }
         let indexQ = self.binarySearch(key: key, value: value)
-        if let insertIndex = indexQ.currentIndex ?? indexQ.insertInIndex {
+        if let insertIndex = indexQ.currentIndex ?? indexQ.insertInIndex, self.canInsert(at: insertIndex) {
             self.insert(indexDict, at: insertIndex)
         }
     }

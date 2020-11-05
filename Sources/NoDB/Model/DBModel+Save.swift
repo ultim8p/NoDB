@@ -22,7 +22,7 @@ extension Array where Element: DBModel {
             guard let upsertedInIndex = savedIds.upsert(idDict, key: idKey) else { continue }
             if let upserCurrentIndex = upsertedInIndex.currentIndex, upserCurrentIndex < elementsSaved.count {
                 elementsSaved[upserCurrentIndex] = saveResult.element
-            } else if let insertedIndex = upsertedInIndex.insertingIndex {
+            } else if let insertedIndex = upsertedInIndex.insertingIndex, elementsSaved.canInsert(at: insertedIndex) {
                 elementsSaved.insert(saveResult.element, at: insertedIndex)
             }
         }
@@ -64,9 +64,14 @@ extension Array where Element: DBModel {
             if self.isEmpty {
                 obj.saveIndexesList(withDBName: dbName, indexesManager: indexesManager)
             }
-            let index = self.getIndexForInsertion(withDBName: dbName, indexesManager: indexesManager)
+            let indexInfo = self.getIndexForInsertion(withDBName: dbName, indexesManager: indexesManager)
+            let index = indexInfo.index
             obj.noDBIndex = index
-            self.insert(obj, at: index)
+            if indexInfo.shouldReplace, self.rangeContains(index: index) {
+                self[index] = obj
+            } else if self.canInsert(at: index) {
+                self.insert(obj, at: index)
+            }
             obj.insertIndexes(withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
             return SaveModel(element: obj, noDBId: id)
         }

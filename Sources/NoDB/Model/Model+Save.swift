@@ -121,17 +121,17 @@ extension Array where Element: DBModel {
     /// If the deletions database contains at least one object, the new object will occupy the postion of the first item in deleted indexes database.
     /// - Parameters:
     ///     - dbName: Name of the database of the mode.
-    func getIndexForInsertion(withDBName dbName: String, indexesManager: IndexesManager) -> Int {
+    func getIndexForInsertion(withDBName dbName: String, indexesManager: IndexesManager) -> (index: Int, shouldReplace: Bool) {
         let indexDBName = IndexesNameType.deleted.getFullName(with: dbName)
         guard let deletions = indexesManager.get(withType: .deletions,
                                                         indexDBName: indexDBName),
             let deletedIndexDict = deletions.first,
-            let index = deletedIndexDict[NoDBConstant.index.rawValue] as? Int else { return self.count }
+            let index = deletedIndexDict[NoDBConstant.index.rawValue] as? Int else { return (self.count, false) }
         indexesManager.delete(indexType: .deletions,
                                      indexDBName: indexDBName,
                                      sortKey: NoDBConstant.id.rawValue,
                                      indexDict: deletedIndexDict)
-        return index
+        return (index, true)
     }
     
     
@@ -169,10 +169,6 @@ extension Array where Element: DBModel {
         let indexDBName = dbName + ":" + NoDBConstant.id.rawValue
         guard let indexesResults = indexesManager.get(withType: .indexes, indexDBName: indexDBName) else  { return nil }
         return models(fromIndexes: indexesResults)
-    }
-    
-    func rangeContains(index: Int) -> Bool {
-        return index >= 0 && index < self.count
     }
     
 }
