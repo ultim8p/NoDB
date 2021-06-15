@@ -9,5 +9,5 @@ import Foundation
 
 struct SaveModel <T: DBModel> {
     var element: T
-    var noDBId: String
+    var noDBId: Any
 }

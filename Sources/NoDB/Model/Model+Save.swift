@@ -16,8 +16,8 @@ extension DBModel {
     
     //Just call this method when ypu know FOR SURE that new indexes should be created
     func insertIndexes(withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
-        let indexes = type(of: self).noDBIndexes
-        indexes?.insertIndexes(for: self, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
+        let indexes = type(of: self).noDBIndexes ?? []
+        indexes.insertIndexes(for: self, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
     }
     
 //    func upsertIndexes(withDBName dbName: String) {
@@ -26,28 +26,28 @@ extension DBModel {
 //    }
     
     func replaceIndexes(with newObj: Self, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
-        let indexes = type(of: self).noDBIndexes
-        indexes?.replaceIndexes(for: self, with: newObj, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
+        let indexes = type(of: self).noDBIndexes ?? []
+        indexes.replaceIndexes(for: self, with: newObj, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
     }
     
     func updateIndexes(with newObj: Self, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
-        let indexes = type(of: self).noDBIndexes
-        indexes?.updateIndexes(for: self, newObj: newObj, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
+        let indexes = type(of: self).noDBIndexes ?? []
+        indexes.updateIndexes(for: self, newObj: newObj, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
     }
     
     func deleteIndexes(withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
-        let indexes = type(of: self).noDBIndexes
-        indexes?.deleteIndexes(for: self, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
+        let indexes = type(of: self).noDBIndexes ?? []
+        indexes.deleteIndexes(for: self, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
     }
 
     func updateIndexes(newNoDBIndexes: [String], withDBName dbName: String, indexesManager: IndexesManager){
-        let indexes = type(of: self).noDBIndexes
-        indexes?.updateIndex(for: self, newNoDBIndexes: newNoDBIndexes, withDBName: dbName, indexesManager: indexesManager)
+        let indexes = type(of: self).noDBIndexes ?? []
+        indexes.updateIndex(for: self, newNoDBIndexes: newNoDBIndexes, withDBName: dbName, indexesManager: indexesManager)
     }
     
     func saveIndexesList(withDBName dbName: String, indexesManager: IndexesManager) {
-        let indexes = type(of: self).noDBIndexes
-        indexes?.saveIndexList(for: self, withDBName: dbName, indexesManager: indexesManager)
+        let indexes = type(of: self).noDBIndexes ?? []
+        indexes.saveIndexList(for: self, withDBName: dbName, indexesManager: indexesManager)
     }
 }
 
@@ -58,7 +58,7 @@ extension Array where Element: DBModel {
     ///     - withId: Id value of the object to find.
     ///     - dbName: Name of the database to search the object for.
     /// - Returns: Object found for the specified id.
-    func object(withId objId: String, dbName: String, indexesManager: IndexesManager) -> Element? {
+    func object(withId objId: Any, dbName: String, indexesManager: IndexesManager) -> Element? {
         return self.object(with: NoDBConstant.id.rawValue,
                            value: objId,
                            dbName: dbName,
@@ -71,7 +71,7 @@ extension Array where Element: DBModel {
     ///     - dbName: Name of the database to search the object for.
     /// - Returns: Object found for the specified id.
     /// - Returns: Index of the element found in this array.
-    func objectAndIndex(withId objId: String, dbName: String, indexesManager: IndexesManager) -> (obj: Element?, index: Int?) {
+    func objectAndIndex(withId objId: Any, dbName: String, indexesManager: IndexesManager) -> (obj: Element?, index: Int?) {
         return self.objectAndIndex(with: NoDBConstant.id.rawValue,
                                    value: objId,
                                    dbName: dbName,

@@ -41,8 +41,7 @@ extension Array where Element: DBModel {
                                indexesManager: IndexesManager,
                                replace: Bool) -> SaveModel<Element>? {
         guard var obj = obj,
-            let id = obj.modelStringValue(for: idKey),
-            !id.isEmpty else {
+            let id = obj.modelId(idKey: idKey) else {
             return nil
         }
         let binaryObj = objectAndIndex(withId: id, dbName: dbName, indexesManager: indexesManager)

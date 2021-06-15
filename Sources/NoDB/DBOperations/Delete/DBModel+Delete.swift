@@ -25,7 +25,7 @@ extension Array where Element: DBModel {
     func delete(_ query: Query, dbName: String, idKey: String, indexesManager: IndexesManager) -> [Element]? {
         guard let deletingObjs = find(query, dbName: dbName, idKey: idKey, indexesManager: indexesManager) else { return nil }
         for obj in deletingObjs {
-            if let objId = obj.modelStringValue(for: idKey) {
+            if let objId = obj.modelId(idKey: idKey) {
                 delete(id: objId, withDBName: dbName, idKey: idKey, indexesManager: indexesManager)
             }
         }
@@ -33,7 +33,7 @@ extension Array where Element: DBModel {
     }
     
     /// Deletes an object with a specified id.
-    func delete(id: String?, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
+    func delete(id: Any?, withDBName dbName: String, idKey: String, indexesManager: IndexesManager) {
         guard let id = id else {
             return
         }
