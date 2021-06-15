@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  String+DeleteIndex.swift
 //  
 //
 //  Created by Guerson Perez on 23/07/20.
