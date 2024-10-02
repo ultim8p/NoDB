@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum QueryOperator {
+public enum QueryOperator {
     case equal
     case greaterThan
     case greaterThanOrEqual

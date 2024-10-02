@@ -23,9 +23,9 @@
         "package": "Mergeable",
         "repositoryURL": "https://github.com/ultim8p/Mergeable",
         "state": {
-          "branch": "development",
-          "revision": "ac4ba3810076b756a1c19f2703ff4a46a323b82d",
-          "version": null
+          "branch": null,
+          "revision": "cdb7cbce9cd311f300621594244874c1acec925d",
+          "version": "0.0.4"
         }
       }
     ]
